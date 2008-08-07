@@ -120,6 +120,13 @@ As this layout algorithm can be CPU-intensive, we allow the user to stop the the
 
 \subsubsection{User Interface}
 % how it is laid out and what it requires to get started. what is the network graph meant to show
+
+
+
+The user interface was designed with a 3-panes. The central pane displays the graph itself. The left pane is for search, filtering and rendering options. The bottom pane displays information about the current view or current selection.  
+
+Users can interact with the graph pane by using the mouse. The graph can be dragged, zoom in or out and elements can be selected.
+
 Given a protein chain, the application first retrieves the architecture of the chain (the `parent architecture'). It then finds all architectures that share one or more domains with the parent architecture.  These architectures, and chains with these architectures, are then visualised as a network graph.
 
 Visualization of the similarity between architectures allows users to quickly and effectively interpret this information. Architectures and, optionally, chains are represented as nodes on the graph. All chains are connected to their architecture by an edge. Architecture node similarities are represented by an edge to that connect to other architectures based on the strength of the similarity. 
