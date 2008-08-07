@@ -18,7 +18,7 @@
 % FIGURE OF DATA SOURCES -> MYSQL DB WITH NAME OF SCRIPTS
 % FIGURE OF DATABASE SCHEMA
 
-The DomVizApp database was built by importing and linking the following sources: Pfam \cite{pfamdb}[TitlesOn], Uniprot \cite{uniprot}, PDB \cite{pdb} and Drugbank \cite{drugbank}.
+The DomVizApp database was built by importing and linking the following sources: Pfam \cite{pfamdb}, Uniprot \cite{uniprot}, PDB \cite{pdb} and Drugbank \cite{drugbank}.
 
 A collection of Perl modules were written to perform data pre-processing and to import the data into a MySQL\footnote{http://www.mysql.com/} database which acts as the master data store. These Perl scripts allow databases to be created given new data from Pfam, Uniprot or the PDB. Importing the data into a general purpose database allows us to easily integrate our data sources, facilitates flexible querying for analysis and allows for additional annotation in the future. The data sources, import scripts and database schema are illustrated in Figure~\ref{dataimport} and described below.  
 
@@ -64,7 +64,7 @@ This shortcoming is a reason that one of the goals of DomVizApp is to assist bio
 
 \subsection{DomVizApp Implementation}
 % EVERYTHING THAT THE APPLICATION DOES AND USES
-DomVizApp was wriiten in Java, using JDK 1.6. We used the Lucene engine\footnote{http://lucene.apache.org/}, which was used to create high-performance search indexes of the biological data. The Prefuse toolkit\footnote{http://prefuse.org/}, a visualization framework for Java, was used to model graph data and visualize the network graph.
+DomVizApp was wriiten in Java, using JDK 1.6. We used the Lucene engine\footnote{http://lucene.apache.org/}, which was used to create high-performance search indexes of the biological data. The Prefuse toolkit \cite{prefuse}, a visualization framework for Java, was used to model graph data and visualize the network graph.
 
 \subsubsection{Data Preparation and Indexing}
 % Details of what the Lucene engine does for you and how exactly you used it for indexing your data
@@ -72,11 +72,11 @@ Our master data was stored in MySQL. As the schema was designed for data integri
 
 As DomVizApp runs as a desktop application, we desired a solution which did not necessarily require the use of MySQL, which would require a database server to be installed and made accessible for the user. A better answer was to generate local, file-based, indexes that could be distributed to users of the application.
 
-Lucene is a library for high-performance creation and searching of text indexes. By taking data from the master MySQL database and producing a Lucene index, we are able to have a separate, transferable, set of files that can be distributed to user's workstations. All the necessary information would be available locally to the user and facilitate the dynamic nature of DomVizApp.
+Lucene is a library for high-performance creation and searching of text indexes. By taking data from the master MySQL database and producing a Lucene index, we were able to have a separate, transferable, set of files that could be distributed to user's workstations. All the necessary information would be available locally to the user and this would facilitate the dynamic nature of DomVizApp.
 
-The first stage was the indexing of our master data to create a searchable index. A Lucene index is stored as set of index files containing an inverted index data structure that allows rapid searching of text words. We interated through each sequence in Pfam, collecting data associated with it, such as its architecture and whether its structure has been solved, to create a Lucene `Document' which is a collection of fields. Each piece of Pfam data was stored as a field for the sequence Document.
+The first stage was the indexing of our master data to create a searchable index. A Lucene index is stored as set of index files containing an inverted index data structure that allows rapid searching of text words. We interated through each sequence in Pfam, collecting data associated with it, such as its architecture and whether its structure has been solved, to create a Lucene \texttt{Document} which is a collection of fields. Each piece of Pfam data was stored as a field for the sequence Document.
 
-We similarly created Documents for domain data, holding the domain Pfam identifier and its clan associations. 
+We similarly created Documents for domain data, holding the Pfam domain identifier and its clan associations. 
 
 Each of these documents was added to the Lucene index. The full workflow is shown in Figure~\ref{luceneworkflow}
 
@@ -88,23 +88,35 @@ Each of these documents was added to the Lucene index. The full workflow is show
  \label{luceneworkflow}
 \end{figure}
 
-The Lucene index was searched from within DomVizApp based on user's specified criteria. Queries are written in a custom query language which is parsed by the Lucene index searcher. Lucene returns `Hits' matching the query and a reference to the original Document (e.g. Pfam sequence entry). We extracted the stored fields from these documents and were then able to use the data in DomVizApp.   
+The Lucene index was searched from within DomVizApp based on user's specified criteria. Queries are written in a custom query language which is parsed by the Lucene index searcher. Lucene returns \texttt{Hits} matching the query and a reference to the original Document (e.g. Pfam sequence entry). We extracted the stored fields from these documents and were then able to use the data in DomVizApp.   
 
 The total size of Lucene index was **fillme**Mb. Average query time to return data associated with a Pfam sequence was **fillme**ms and to return architectures containing a random domain took **fillme**ms on average. 
 
 \subsubsection{Network Graph Visualisation}
 % details of what the prefuse engine does for you and how exactly you used it for rendering network graphs. what is involved in customizing it for your application. a figure helps. show different components, highlight those that you need to customize/hack. describe layout techniques and force-directed layout in particular. what is the network graph meant to show
-There are several algorithms available for constructing network drawings. The Prefuse library provides many layout algorithms which can be customised based on requirements. 
+We are using network graphs to visually represent our data and their relationships. Graphs are a common way to represent structured data with relationships within that data. The data is represented as nodes and relations are edges that connect the nodes. Graph visualisation is a fundamental component of DomVizApp and we used the Prefuse framework to both model graph data structures and to display the graph.
 
-Due to the large number of nodes and edges, typical of large bioinformatics datasets, standard graph rendering is difficult. We required not only a clear representation of the graph itself but also needed to be able to visualise features common to a group of architectures. DomVizApp uses a force-directed layout \cite{force} which attempts to place all the nodes by modelling edges as springs with physical forces. These bring connected nodes together and spread unconnected nodes apart until the forces reach equilibrium, resulting in clear and expressive graphs. 
+The framework provides interfaces and libraries for graph modelling, rendering and layout. Prefuse offers an API to control and customize almost all components of graph visualisation. The are several core components of the Prefuse framework, which are shown in Figure~\ref{prefuseframework} and described below.
 
-Two architectures that are similar will be placed closer in the resulting graph than architectures that are less similar. Groups of similar architectures will gather closer together.
+\begin{figure}[h]
+ \begin{center}
+ \includegraphics[scale=0.5]{figures/placeholder.jpg}
+ \end{center}
+ \caption{Components of the Prefuse Framework}
+ \label{prefuseframework}
+\end{figure}
+
+\textbf{Data representation:} To model architectures and sequences we used the \texttt{Node} class. Their corresponding relationships were modelled using the \texttt{Edge} class. Both Node and Edge classes are subtypes of \texttt{Entity} which can hold any number of named elements with corresponding value. We stored Pfam domain identifiers, architectures, similarity scores and sequence names with their corresponding node or edge. This simplified querying of the graph itself as all biological data related to nodes or edges were stored with the entities themselves. No further lookup for data was required.
+
+\textbf{Visual representation:} We then represented each node and edge as a \texttt{VisualItem}. A VisualItem stores the data related to entities and adds further properties related to the size, colour and other visual attributes. We used a different representation for architecture and sequences so they could be distinguished from each other.
+
+\textbf{Interactions:} Prefuse \texttt{ActionLists} were used to respond to user actions or system events. These included executing the layout algorithm and adding callbacks to users clicking on nodes or edges. We were able to display the attributes of entities and collapse and expand sequence nodes in response.
+
+\textbf{Rendering:} There are several algorithms provided for constructing network drawings and Prefuse allows most aspects of the layout algorithms to be customised. Due to the large number of nodes and edges, typical of large bioinformatics datasets, standard graph rendering is tricky and usually not satisfactorily clear. We required not only a clear representation of the graph itself but also needed to be able to visualise features common to a group of architectures. DomVizApp uses a force-directed layout \cite{force}, provided by Prefuse, which attempts to place all the nodes by modelling edges as springs with physical forces. All of these forces (gravity, spring and drag) can be customised as required. By simulating these forces across the nodes and edges, the layout brings connected nodes together and spreads unconnected nodes apart until the forces reach equilibrium, resulting in clear and expressive graphs. 
+
+In DomVizApp, this means that two architectures that are similar will be placed closer in the resulting graph than architectures that are less similar. Groups of similar architectures will gather closer together. We customised the spring force of the edges which join architecture nodes and manipulated its properties based on the similarity score of the architectures. This modification brought architectures that are more similar than others closer together in the layout.
 
 As this layout algorithm can be CPU-intensive, we allow the user to stop the the algorithm when a reasonable layout has been acheived. The final graph may not be mathematically the best graph but achieves an elegant layout \cite{force}.
-
-The spring force of an edge which joins architecture nodes is manipulated based on the similarity score of the architectures. This modification brings architectures that are more similar than others closer together in the layout. 
-
-
 
 \subsubsection{User Interface}
 % how it is laid out and what it requires to get started. what is the network graph meant to show
@@ -152,8 +164,6 @@ $C$ is the set of connected architectures, initialised with only the parent arch
 In this manner, each architecture in the set of unconnected architectures is removed and connected to another which has the maximal similarity score.
 
 If there are two or more architecture pairs with the same similarity score, the chosen relationship is random unless one of the pairs include the parent architecture of interest. In this case, the pair which includes the parent architecture is preferred. Therefore, the resulting graph may not be the only graph that represents the pairing of architectures with maximum scores. 
-
-\subsection{Graph layout \& filtering}
 
 
 
