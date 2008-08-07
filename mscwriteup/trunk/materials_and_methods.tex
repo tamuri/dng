@@ -70,12 +70,14 @@ Given a protein chain, the application first retrieves the architecture of the c
 The visualisation application was implemented in Java. Core libaries that were used include the Lucene engine (http://lucene.apache.org/) which was used to create high-performance search indexes. All protein domain and associated data was stored as a Lucene document. The Prefuse library (http://prefuse.org/) was used to model and visualize the network graph.
 
 \subsubsection{Lucene Indexing Engine}
+% Details of what the Lucene engine does for you and how exactly you used it for indexing your data
 A searchable Lucene index was then created from the collected MySQL data. A small Java program was written to generate the search index. 
 
 \subsubsection{Prefuse Graph Library}
-s
+% Same as Lucene. A figure helps.
+There are several algorithms available for constructing network drawings. The Prefuse library provides many layout algorithms which can be customised based on requirements. The application uses a force-directed layout \cite{force} which attempts to place all the nodes by modelling edges as springs. These bring connected nodes together and spread unconnected nodes apart until the forces reach equilibrium, resulting in relatively attractive drawings. As this layout algorithm can be CPU-intensive, we allow the user to stop the the algorithm when a reasonable layout has been acheived.
 \subsubsection{Force-Directed Layout}
-s
+The spring force of an edge which joins architecture nodes is manipulated based on the similarity score of the architectures. This modification brings architectures that are more similar than others closer together in the layout. 
 \subsubsection{User Interface}
 s
 
@@ -121,7 +123,7 @@ If there are two or more architecture pairs with the same similarity score, the 
 \subsection{Graph layout \& filtering}
 Architectures and, optionally, chains are represented as nodes on the graph. All chains are connected to their architecture. Architectures are connected by an edge to other architectures based on the results of the joining algorithm described above.  
 
-There are several algorithms available for constructing network drawings. The Prefuse library provides many layout algorithms which can be customised based on requirements. The application uses a force-directed layout \cite{force} which attempts to place all the nodes by modelling edges as springs. These bring connected nodes together and spread unconnected nodes apart until the forces reach equilibrium, resulting in relatively attractive drawings. As this layout algorithm can be CPU-intensive, we allow the user to stop the the algorithm when a reasonable layout has been acheived.
 
-The spring force of an edge which joins architecture nodes is manipulated based on the similarity score of the architectures. This modification brings architectures that are more similar than others closer together in the layout. 
+
+
 
