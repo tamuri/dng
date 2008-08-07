@@ -1,0 +1,77 @@
+\section{Results}
+
+%COMMENTS:
+	% Data must be presented in a form that makes clear the significance of any results obtained by the student. Wherever possible the results should be presented in the form of tables and graphs (with statistics where appropriate). You must also describe your results in the text. Attention should be drawn to interesting results but general discussion should be left until the next section. Figures should be used as appropriate.
+	% 
+	% \begin{itemize}
+	% \item Does this section contain results in a tabular or graphical form?
+	% \item Are the tables enumerated, each with a correct description of the contents? Are the columns and rows correctly labelled together with units of measurement?
+	% \item Are the figures enumerated and appropriate for the type of data? Does each have a legend containing an accurate description of the contents of the figure?
+	% \item Do graphs have axes labelled correctly (including units)? Is the scale of the axes appropriate for the data?
+	% \item Are statistical results used when necessary? Are the correct tests used?
+	% \item Are figures clearly labelled with a key to abbreviations in the legend and an accurate description of what they are?
+	% \item Does the text draw attention of the salient features of the figures or tables, rather than simply repeat what is already in them?
+	% \item Is the results section structured to make clear the significance of the results and to provide a basis for subsequent discussion?
+	% \end{itemize}
+	
+	% Results: outcomes of all experiments.  For software, descriptions of the final system as well as initial systems.  Significant changes in direction should be documented and explained --- they are probably the result of something interesting you learned.  Description of a system includes an analysis of its performance (e.g. speed, domain of utility, usability).  
+	
+	% Do not try to maintain too rigid a distinction between Methods, Results, and Discussion. Someone reading your Results section will want to know why you did it, what you did, what the results are and what they mean - without having to flip backwards and forwards between other sections. There are no hard and fast rules here, and you may find after the first draft that some material is better in the Methods, or the Discussion, or vice versa. Some general guidelines are possible:
+	% 
+	% * the design of an experiment should be in the Results, and the details (usually) in the Methods
+	% * if the details are necessary for understanding the results, that is where they should be - for example if you are comparing Southern blots at different stringencies, then the hybridisation and washing conditions must be in the Results. The legend to a figure or table is often a good place for this sort of detail.
+	% * don't clog up the Results with unnecessary experimental detail
+	% * preliminary experiments (e.g., developing and testing an assay) can go in either Methods or Results. But remember that the examiner may not read the Methods section in detail, so if you want her/him to be impressed by the amount of work you have done, or if you haven't got much else in the Results section, then put them into Results. But if you have a decent amount of results anyway, then putting less important stuff in can dilute the overall effect
+	% * the best place to discuss what a result means is at the point when you are describing it. Don't feel that you have to hold it back for the Discussion, which would involve having to repeat chunks of your Results.
+	% * if the interpretation of your results means having to refer to the literature, then it is probably better to do that in the Discussion. In general, we wouldn't expect many references in the Results section.
+	% * the overall Golden Rule is to make it as easy as possible to read and understand
+	% 
+	% Your results section should not be a series of graphs and tables with no explanation  There should be:
+	% 
+	% * a short introduction to each section, explaining, briefly, the purpose and design of the experiment
+	% * a reference to the results (either as Tables or Figures). All tables and figures must be numbered and each one must be referred to in the text. 
+	% * a description which highlights the results that are of interest
+	% * a description of how these results influenced the planning of the following results
+
+
+
+\subsection{Domain and architecture analysis}
+Uniprot chain; we get chain's architecture from Pfam; get related architectures (and chains) from Pfam; create nodes and edges;
+
+\subsection{Visualization application}
+
+\subsubsection{Graphs}
+Graphs; different layouts? 
+
+\subsubsection{Interaction}
+Exploring the graph;
+
+
+\subsection{Evaluation of architecture similarity}
+Results of domain similarity across Pfam chains; (1,2...n domains in common); how will we evaluate whether our graphs are ``good''?
+
+
+\subsubsection{Better techniques to generate similarity matrix}
+Technique 2: Improved method based on domain phylogenetic tree paper
+Let us also denote that the numbers of domain organizations of A and B are nA and nB, respectively, and the number of domain organizations shared by A and B is nAB. A and B initially share the same repertoires (i.e., nA = nAB = nB). As A and B diverge, nAB decreases because they independently accumulate new domain organizations and lose extant ones. Assuming that the gain and loss respectively follow the Poisson process, the evolutionary distance between O and A, dOA, is given by  dOA = -ln(nAB/nB)
+
+Technique 3: Using profile-profile comparison tools such as PRC or HHsearch to create domain scoring matrix, then locally align domain architecture.
+
+Technique 4: Use of Pfam clans - 2006
+
+Technique 5: HMM-HMM comparison
+influence of domain length; (design of custom algorithm?); strong vs weak similarity?
+
+\subsection{How to know if graph is interesting graph?}
+Technique for scoring architecture; does it have biological significance? e.g. are proteins with same/similar architecture involved in the same pathway?
+
+\subsection{Data analysis}
+Architecture searches: `and' vs `or' domain searches; for each domain, number of architectures; for each architecture, number of domains repeated in others (1,2..n times);
+
+\subsection{Application: druggable domain discovery}
+Application: druggable domain discovery
+
+\subsection{Performance}
+Number of nodes in graph; size of data set;
+
+

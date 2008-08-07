@@ -1,0 +1,73 @@
+% \documentclass[a4paper,11pt]{report}
+\documentclass[a4paper,11pt]{scrartcl}
+\usepackage{setspace}
+\usepackage[pdftex]{graphicx}
+\usepackage[UKenglish]{babel}
+\usepackage{url}
+\usepackage{algorithmic}
+\usepackage{rotating}
+
+\pdfinfo {
+	/Author (Asif Tamuri)
+	/Title (Domain Network Graphs)
+	/Subject (Biofinformatics visualization)
+}
+
+% Title Page
+\title{Domain Network Graphs}
+\author{Asif Tamuri
+\\\\\\\\\\
+\\\\\\\\\\
+\\\\\\\\\\
+\\\\\\\\\\
+\\Supervisor: Roman Laskowski (EBI)
+\\
+\\School of Crystallography
+\\Birkbeck, University of London
+\\Malet Street
+\\London WC1E 7HX}
+\date {}
+
+\begin{document}
+\emergencystretch=11pt
+\DeclareGraphicsExtensions{.jpg,.pdf,.mps,.png}
+\maketitle
+\thispagestyle{empty}
+
+\doublespacing
+
+\include{abstract}
+
+\tableofcontents
+
+% \include{acknowledgements} - 2,500 words for each section
+\include{introduction}
+\include{materials_and_methods}
+\include{results}
+\include{discussion}
+
+%\renewcommand{\bibname}{References}                                                   
+\addcontentsline{toc}{section}{\protect\numberline{}References}
+\bibliography{references}
+\bibliographystyle{jmb}
+
+\clearpage
+
+\appendix
+\section*{Appendix}
+\addcontentsline{toc}{section}{\protect\numberline{}Appendix}
+\section{Example of Pfam source data}
+\begin{verbatim}
+>41_HUMAN         |====================| P11171.4 864 a.a.
+4_1_CTD          1                 ---  (95) PF05902.4 4.1 protein C-terminal domain (CTD)  747-861
+FA               1             --       (205) PF08736.2 FERM adjacent (FA)  498-544
+FERM_C           1          ---         (410) PF09380.1 FERM C-terminal PH-like domain  405-494
+FERM_M           1       ---            (757) PF00373.9 FERM central domain  292-401
+FERM_N           1     --               (531) PF09379.1 FERM N-terminal domain  214-290
+Pfam-B_153658    1 ---                  (2) PB153658   1-183
+SAB              1                    --(78) PF04382.4 SAB domain  667-715
+\end{verbatim}                    
+\end{document}                           
+                                 
+                                 
+
