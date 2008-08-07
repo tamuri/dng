@@ -64,22 +64,21 @@ This shortcoming is a reason that one of the goals of DomVizApp is to assist bio
 
 \subsection{DomVizApp Implementation}
 % EVERYTHING THAT THE APPLICATION DOES AND USES
-
 Given a protein chain, the application first retrieves the architecture of the chain (the `parent architecture'). It then finds all architectures that share one or more domains with the parent architecture.  These architectures, and chains with these architectures, are then visualised as a network graph.
 
 The visualisation application was implemented in Java. Core libaries that were used include the Lucene engine (http://lucene.apache.org/) which was used to create high-performance search indexes. All protein domain and associated data was stored as a Lucene document. The Prefuse library (http://prefuse.org/) was used to model and visualize the network graph.
 
-\subsubsection{Lucene Indexing Engine}
+\subsubsection{Data Preparation and Indexing}
 % Details of what the Lucene engine does for you and how exactly you used it for indexing your data
 A searchable Lucene index was then created from the collected MySQL data. A small Java program was written to generate the search index. 
-
-\subsubsection{Prefuse Graph Library}
-% Same as Lucene. A figure helps.
+\subsubsection{Network Graph Visualisation}
+% details of what the prefuse engine does for you and how exactly you used it for rendering network graphs. what is involved in customizing it for your application. a figure helps. show different components, highlight those that you need to customize/hack. describe layout techniques and force-directed layout in particular. what is the network graph meant to show
 There are several algorithms available for constructing network drawings. The Prefuse library provides many layout algorithms which can be customised based on requirements. The application uses a force-directed layout \cite{force} which attempts to place all the nodes by modelling edges as springs. These bring connected nodes together and spread unconnected nodes apart until the forces reach equilibrium, resulting in relatively attractive drawings. As this layout algorithm can be CPU-intensive, we allow the user to stop the the algorithm when a reasonable layout has been acheived.
-\subsubsection{Force-Directed Layout}
+
 The spring force of an edge which joins architecture nodes is manipulated based on the similarity score of the architectures. This modification brings architectures that are more similar than others closer together in the layout. 
+
 \subsubsection{User Interface}
-s
+% how it is laid out and what it requires to get started
 
 \subsection{Computing the scores for architecture similarity}
 
