@@ -120,18 +120,15 @@ As this layout algorithm can be CPU-intensive, we allow the user to stop the the
 
 \subsubsection{User Interface}
 % how it is laid out and what it requires to get started. what is the network graph meant to show
+DomVizApp was designed to let bioinformaticians explore sequence architectures easily and clearly. The user interface was designed to be encourage exploration through simplicity and responsiveness.
 
+The user interface is implemented using Java Swing libraries and the main screen is divided into 3-panes. The left pane is for search, filtering and rendering options. The central pane displays the network graph of architectures. The bottom pane displays information about the current view or current user selection.
 
+Users interact with the graph pane using the mouse. The graph can be dragged, zoom in or out and elements can be selected. Further information related to selected elements is displayed in the bottom pane.
 
-The user interface was designed with a 3-panes. The central pane displays the graph itself. The left pane is for search, filtering and rendering options. The bottom pane displays information about the current view or current selection.  
+To begin using DomVizApp, a user starts by supplying a protein sequence identifier. The application retrieves the architecture of the sequence; this becomes the `parent architecture'. It then finds all architectures that share one or more domains with the parent architecture. These architectures, and chains with these architectures, are then visualised as a network graph. We allow the user to then apply further filtering to the results. For example, they may limit results to certain species or specific domains of interest. By using a local index of data, DomVizApp is able to quickly respond to changes in user's criteria and render new graphs.
 
-Users can interact with the graph pane by using the mouse. The graph can be dragged, zoom in or out and elements can be selected.
-
-Given a protein chain, the application first retrieves the architecture of the chain (the `parent architecture'). It then finds all architectures that share one or more domains with the parent architecture.  These architectures, and chains with these architectures, are then visualised as a network graph.
-
-Visualization of the similarity between architectures allows users to quickly and effectively interpret this information. Architectures and, optionally, chains are represented as nodes on the graph. All chains are connected to their architecture by an edge. Architecture node similarities are represented by an edge to that connect to other architectures based on the strength of the similarity. 
-
-%Usage
+The main component of the user interface is the network graph pane. Visualization of the similarity between architectures allows users to quickly and effectively interpret this information. Architectures and sequences are represented as nodes on the graph. All sequences are connected to their architecture by an edge. Architecture similarities are represented by an edge that connects architecture nodes to other architectures based on the strength of the similarity. 
 
 \subsection{Computing the scores for architecture similarity}
 
