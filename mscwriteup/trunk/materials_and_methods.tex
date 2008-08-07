@@ -68,13 +68,13 @@ DomVizApp was wriiten in Java, using JDK 1.6. We used the Lucene engine\footnote
 
 \subsubsection{Data Preparation and Indexing}
 % Details of what the Lucene engine does for you and how exactly you used it for indexing your data
-Our master data was stored in MySQL. As the schema was designed for data integrity and to reduce redundancy, its relational nature did not suit general-purpose querying. The performance of SQL queries was not fast enough for DomVizApp to gives users a highly interactive and dynamic experience. A common solution is to denormalise the data into new tables within MySQL that have been especially created for the types of queries that will be run against it.
+Our master data was stored in MySQL. As the schema was designed for data integrity and to reduce redundancy, its relational nature did not suit general-purpose querying. The performance of SQL queries was not fast enough for DomVizApp to give users a highly interactive and dynamic experience. A common solution is to denormalise the data into new tables within MySQL that have been especially created for the types of queries that will be run against it.
 
-As DomVizApp runs as a desktop application, we desired a solution which did not necessarily require the use of MySQL. The use of MySQL would require a database server to be installed to run DomVizApp. A better answer was to use a tool to generate local, file-based, indexes that could be distributed to users of DomVizApp.
+As DomVizApp runs as a desktop application, we desired a solution which did not necessarily require the use of MySQL, which would require a database server to be installed and made accessible for the user. A better answer was to generate local, file-based, indexes that could be distributed to users of the application.
 
 Lucene is a library for high-performance creation and searching of text indexes. By taking data from the master MySQL database and producing a Lucene index, we are able to have a separate, transferable, set of files that can be distributed to user's workstations. All the necessary information would be available locally to the user and facilitate the dynamic nature of DomVizApp.
 
-The first stage was the indexing of our master data to create a searchable index. A Lucene index is stored a set of index files containing a inverted index data structure that allow rapid searching of text words. We interated through each sequence in Pfam, collecting data associated with it, such as its architecture and whether its structure has been solved, to create a Lucene `Document' which is a collection of fields. Each piece of Pfam data was stored as a field for the sequence Document.
+The first stage was the indexing of our master data to create a searchable index. A Lucene index is stored as set of index files containing an inverted index data structure that allows rapid searching of text words. We interated through each sequence in Pfam, collecting data associated with it, such as its architecture and whether its structure has been solved, to create a Lucene `Document' which is a collection of fields. Each piece of Pfam data was stored as a field for the sequence Document.
 
 We similarly created Documents for domain data, holding the domain Pfam identifier and its clan associations. 
 
