@@ -1,5 +1,8 @@
 \section{Materials and Methods}
-% The materials and method section should describe in detail the procedures followed, indicating an awareness of any likely pitfalls or problems with the techniques. Published techniques need not be described in detail but should be referenced. The student should demonstrate an understanding of established techniques. \underline{N.B.} no results obtained by the student should appear in this section.
+
+
+% {{{ comments 
+%The materials and method section should describe in detail the procedures followed, indicating an awareness of any likely pitfalls or problems with the techniques. Published techniques need not be described in detail but should be referenced. The student should demonstrate an understanding of established techniques. \underline{N.B.} no results obtained by the student should appear in this section.
 % 
 % \begin{itemize}
  % \item Does this section describe in detail the procedures followed? Could you carry out this project following the methods reported here?
@@ -11,7 +14,9 @@
 	% \end{center}
     % \caption{Example of an embedded pdf}
 % \end{figure}
+%}}}
 
+%{{{ data sources 
 \subsection{Data Sources}
 % WHERE THE DATA COME FROM
 % WHAT THOSE DATA ARE
@@ -42,8 +47,11 @@ In order to link domain architectures to sequences and taxonomy, Uniprot v14.0 (
 The PDB records were used to determine protein sequences that have had their structure solved. DomVizApp uses this information to allow users to filter for architectures that belong to a sequence that has had its structure determined. Links between PDB chain and Uniprot are only available in separate downloads for each individual chain from the Worldwide Protein Data Bank (wwPDB). Rather than downloading and parsing the full PDB database, we used the PDBSprotEC mappings \cite{pdbsprotec} which are available from the Bioinformatics Group at UCL\footnote{http://www.bioinf.org.uk/pdbsws/}. The dataset has 110,858 PDB chains mapped to *fillme* distinct Swissprot sequences. 
 
 \subsubsection{DrugBank}
-To analyse the targetting of proteins by drugs, details of drugs and their corresponding targets were obtained from the DrugBank \cite{drugbank} drugset as of 14 June 2008. The full drugcard set contains comprehensive drug data combined with drug-target data, such as sequence, Swissprot identifier and GO classification information. It also includes Pfam domains for each of the targets but it simply lists all the domains belonging to the target, not specifically the domains targetted by the drug. Only approved drug targets were considered in the analysis. The full drugcard set lists 4,764 drugs of which 1,484 are flagged as `Approved'. For our analysis, we only considered human targets.
+To analyse the targetting of proteins by drugs, details of drugs and their corresponding targets were obtained from the DrugBank \cite{drugbank} drugset as of 14 June 2008. The full drugcard set contains comprehensive drug data combined with drug-target data, such as sequence, Swissprot identifier and GO classification information. It also includes Pfam domains for each of the targets but it simply lists all the domains belonging to the target, not specifically the domains targetted by the drug. Only approved drug targets were considered in the analysis. The full drugcard set lists 4,764 drugs of which 1,484 are flagged as `Approved'. For our analysis, we only considered human targets. 
 
+%}}}
+
+%{{{ data analysis
 \subsection{Domain Architecture Analysis}
 % DESCRIBE ANALYSIS PERFORMED
 % HOW THEY WERE PERFORMED
@@ -62,6 +70,9 @@ To improve the number of probable druggable proteins, we should also include tho
 
 This shortcoming is a reason that one of the goals of DomVizApp is to assist bioinformaticians to interactively explore protein architectures by allowing them to indicate domains of interest (say, a domain known to bind a drug) and then update the network graph accordingly.
 
+%}}}
+
+%{{{ implementation
 \subsection{DomVizApp Implementation}
 % EVERYTHING THAT THE APPLICATION DOES AND USES
 DomVizApp was wriiten in Java, using JDK 1.6. We used the Lucene engine\footnote{http://lucene.apache.org/}, which was used to create high-performance search indexes of the biological data. The Prefuse toolkit \cite{prefuse}, a visualization framework for Java, was used to model graph data and visualize the network graph.
@@ -120,16 +131,19 @@ As this layout algorithm can be CPU-intensive, we allow the user to stop the the
 
 \subsubsection{User Interface}
 % how it is laid out and what it requires to get started. what is the network graph meant to show
-DomVizApp was designed to let bioinformaticians explore sequence architectures easily and clearly. The user interface was designed to be encourage exploration through simplicity and responsiveness.
+DomVizApp was designed to let bioinformaticians explore sequence architectures easily and clearly. The user interface was designed to encourage exploration through simplicity and responsiveness.
 
-The user interface is implemented using Java Swing libraries and the main screen is divided into 3-panes. The left pane is for search, filtering and rendering options. The central pane displays the network graph of architectures. The bottom pane displays information about the current view or current user selection.
+The interface is implemented using Java Swing libraries and the main screen is divided into 3-panes. The left pane is for user input: search, filtering and rendering options. The central pane displays the network graph. The bottom pane displays information about the current view or current user selection.
 
-Users interact with the graph pane using the mouse. The graph can be dragged, zoom in or out and elements can be selected. Further information related to selected elements is displayed in the bottom pane.
+Users can interact with the graph pane using the mouse. The graph can be dragged, zoomed in or out and elements (nodes and edges) can be selected. Further information related to selected elements is displayed in the bottom pane.
 
-To begin using DomVizApp, a user starts by supplying a protein sequence identifier. The application retrieves the architecture of the sequence; this becomes the `parent architecture'. It then finds all architectures that share one or more domains with the parent architecture. These architectures, and chains with these architectures, are then visualised as a network graph. We allow the user to then apply further filtering to the results. For example, they may limit results to certain species or specific domains of interest. By using a local index of data, DomVizApp is able to quickly respond to changes in user's criteria and render new graphs.
+To begin using DomVizApp, a user enters a protein sequence identifier. The application retrieves the architecture of the sequence; this becomes the `parent architecture'. It searches for all architectures that share one or more domains with the parent architecture. These architectures, and chains with these architectures, are visualised as a network graph. We allow the user to apply further filtering to this graph of results. For example, they may limit results to certain species or specific domains of interest. Because we are searching data held in an index stored locally, DomVizApp is able to quickly respond to changes in user's criteria and render new graphs. 
 
-The main component of the user interface is the network graph pane. Visualization of the similarity between architectures allows users to quickly and effectively interpret this information. Architectures and sequences are represented as nodes on the graph. All sequences are connected to their architecture by an edge. Architecture similarities are represented by an edge that connects architecture nodes to other architectures based on the strength of the similarity. 
+The main component of the user interface is the network graph pane. Visualization of the similarity between architectures allows users to quickly and effectively interpret this information. Architectures and sequences are represented as nodes on the graph. All sequences are connected to their architecture by an edge. Architecture similarities are represented by an edge that connects architecture nodes to other architectures based on the strength of the similarity. We wrote rendering components for Prefuse to animate the addition and removal of nodes to highlight changes in the graph due to changes in criteria. 
 
+%}}}
+
+%{{{ computing architecture similarity
 \subsection{Computing the scores for architecture similarity}
 
 In order for the application to render a network graph, architectures are represented as nodes and are joined to other architectures with an edge based on architecture similarity.
@@ -152,7 +166,9 @@ Given the generated similarity matrix we then use the Needleman-Wunsch algorithm
 Using this technique on a given set of architectures, scores are calculated for every possible pair of architectures.
 
 % FIGURE showing example of scoring
+%}}}
 
+%{{{ using matrix of scores to draw network graph
 \subsection{Using Matrix of Scores to Draw Network Graph}
 
 To visualize a set of architectures as a network graph, the calculated maximal scores are used to pair-up each architecture in the set and create an edge between the two architecture nodes. The procedure is as follows:
@@ -168,9 +184,6 @@ $C$ is the set of connected architectures, initialised with only the parent arch
 In this manner, each architecture in the set of unconnected architectures is removed and connected to another which has the maximal similarity score.
 
 If there are two or more architecture pairs with the same similarity score, the chosen relationship is random unless one of the pairs include the parent architecture of interest. In this case, the pair which includes the parent architecture is preferred. Therefore, the resulting graph may not be the only graph that represents the pairing of architectures with maximum scores. 
-
-
-
-
+%}}}
 
 
