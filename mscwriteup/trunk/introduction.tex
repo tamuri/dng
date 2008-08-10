@@ -1,59 +1,5 @@
-\section{Introduction}
-
-Areas to cover:
-
-\subsection{Protein domains and architectures}
-A protein domain is defined as ``a structural unit which can be found in multiple protein contexts'' \cite{pfamdb}. A `structural unit' usually means that the part of the protein marked as a domain can fold to a stable structure when separated from the globular protein. They are components of proteins that establish sequence or structural similarity for other proteins that share the same domain. Domains found in different proteins often share the same, or comparable, function. If proteins share several of the same domains, it can indicate that those proteins have a common function and are evolutionarily related.
-
-A protein's architecture, or domain organisation, is the ``collection of domains that are present on a protein'' \cite{pfamdb}, and can be composed of one or more domains. Importantly, it is the \textit{ordered} sequence of domains in a protein. Two proteins may share all the same domains but not share architectures due to a different order of domains. For example, an architecture with order of domains `XYZ' is not the same as the architecture `ZYX' even though they are composed of the same domains. Architectures link evolutionary related proteins \cite{fong} and proteins which share equivalent architectures can be loosely considered as homologous. 
-
-\subsubsection*{Domains} ``A structural unit which can be found in multiple protein contexts'' (Pfam); building blocks of proteins; based on sequence or structural similarity; usually form stable structures when separated from the complete protein; perform same or similar function in different proteins; if several domains are found in different proteins, then function is usually related; 
-
-Regions to which the same domain is assigned are guaranteed to reflect their common ancestry (see below)...
-
-\subsubsection*{Architectures} ``Collection of domains that are present on a protein'' (Pfam); multiple domain organisation in proteins; chain with the same architecture all share the same domain organisation; link evolutionary related proteins; arise through rearrangement of architectures and acquisition of domains; 
-
-%% rewrite the paragraph below
-The architecture, or domain organisation, of a protein is the ordered sequence of domains in the protein. For example, if a protein has domains A, B, and C along its primary structure in that order, its domain organization is defined as "ABC" (fig. 1). It is distinguished from the domain organization "BAC," which consists of the same domains but their order is different, and is also distinguished from the domain organization "ABCC," which has an extra C domain. The domain organization could also be composed of one domain. Regions to which the same domain is assigned are guaranteed to reflect their common ancestry, and therefore, proteins with the same domain organization are roughly regarded as homologous over their total length.
-%% rewrite the paragraph above
-
-\subsubsection{Architecture Similarity}
-Presently, there is no canonical method to measure architecture similarity. Pfam score architecture similarity through a heuristic ranking \cite{pfam2002} of:
-\begin{itemize}
-	\item Number of domains in common, from identical domain architectures,
-	\item Number of domains in common, through re-ordered combinations and
-	\item Smaller number of common domains.
-\end{itemize}
-Pfam later introduced the concept of `clans' \cite{pfamdb}. Each clan contains domains that are thought to share a common evolutionary ancestor that have been identified through:
-\begin{itemize}
-	\item Related structure,
-	\item Related function,
-	\item Substantial matches of sequences to HMMs for other families and
-	\item HMM profile-profile comparison.
-\end{itemize}
-Each of these elements are used to score a relationship between domains. If the score is deemed significant, the domains are said to be in the same clan.
-
-Other techniques for studying domain architectures include using the concept of fission and fusion of domains to build pathways of protein evolution \cite{fong}. A set of graph tools has also been developed to define the domain organisation of proteins in an entire organism \cite{cado}. The resulting graphs can then be used to compare different organisms.
-
-\subsubsection*{Pfam} Database of protein domains and families; represented by profile-HMMs; functional annotation of proteins; review current methods of searching for proteins with domains (i.e. web interface)
-
-\subsubsection*{Drug targets} A drug typically binds to a site on target. The targets are often recognisable domains on the protein (druggable domains); a drug that binds to a particular protein's domain is likely to bind to another related protein with the same domain (same family);
-
-Identification of protein binding sites (3D)
-
-\subsubsection*{Aim of this project} A new visualization tool to easily visualise, explore and locate proteins with similar architectures and domains; to be able to specify domains of interest; to see relatives of any protein chain and the domains that they have in common; the more common architectures are closer to the chain of interest; clearly see promiscuous domains compared with those domains that are less widely distributed (extremes); ultimately identify other proteins that have drug-binding domains; find related druggable proteins (defined as proteins with the same proteins architecture as drug targets) and druggable domains; 
-
-It is known that the overall functions of two proteins related by jumbled domain architectures are often similar (The geometry of domain combination in proteins, Bashton M, Chothia, C).
-
-
-\subsubsection*{Literature review} Analysis of protein architectures: ``Modelling the evolution of Protein Domain Architectures Using Maximum Parsimony'' J Mol Biol. 2007 February 9; 366(1): 307-315; ``Comparative Analysis of Protein Domain Organization'' Genome Research 14:343-353; Drug targets: ``Drug-target network'' Nature Biotechnology 2007 October Vol. 25 Num. 10; \emph{Exploration of Pfam domain architectures:} ``PfamAlyzer: domain-centric homology search'' Bioinformatics Vol. 23 no 24 2007, pgs: 3382-3383.
-
-PRODOC for architecture similarity
-
-Test citation: References should be cited in text and listed at the end using the format of the \emph{Journal of Molecular Biology} e.g. \cite{pfamdb}. 
-
-
- % The introduction should record the background to the project and place the project in context with already published information. Essentially a literature review. It should also contain the aims of the project.
+%{{{ comments
+% The introduction should record the background to the project and place the project in context with already published information. Essentially a literature review. It should also contain the aims of the project.
 % 
  % \begin{itemize}
  % \item Discuss the motivation for the work that is being report
@@ -82,5 +28,92 @@ Test citation: References should be cited in text and listed at the end using th
  % \item Describe what others have done and hence sets a benchmark for the current project
  % \item Justify the user of specific solution techniques or problem solving procedures.
  % \end{itemize}
+%}}}
 
+
+%{{{ introduction
+\section{Introduction}
+Find new drug targets and "Rationally score and assess the likely success of future drug targets."
+"James Black is famously quoted as saying: 'the most fruitful basis for the discovery of a new drug is to start with an old drug'"
+
+Drugs target a small number of targets and developing drugs against new families is slow. /cite{How many drug targets are there? - nature reviews}
+
+
+The continuing growth, collection and annotation of protein data is leading to a requirement for tools to assist bioinformaticians to explore, analyse and discover relationships in these data. 
+
+Protein domains and architectures are important annotations describing repeating motifs and units that are found repeatedly in multiple proteins. Proteins sharing domains or similar architectures have been shown to have similar or related function. It is possible to visualise architecture relationships and similarities by considering them as a network graph. These graphs assist users to views similar proteins that share domain architectures.
+
+Graphs are often an ideal way of viewing biological data and there have been many areas of biology, such as metabolic pathways\cite{pathway_app} and protein interactions\cite{proteinint_app}, that have used network graphs and many tools are now available to visualise biological data (\cite{cytoscape}).
+
+There have been much research to use networks or graphs to present and analyse protein domains and architectures. \cite{treeoflife}, \cite{proviz} However, there aren't any tools available that allow users to interact with and explore this data being presented visually. Most current solutions are one-dimensional lists and web pages which do not give a sufficiently broad view of protein relationships.
+%}}}
+
+%{{{ aim
+\subsection{Aim} The work presented here describes the DomVizApp application, a new visualization tool to easily visualise, explore and locate proteins with similar architectures and domains. DomVizApp calculates similarity scores for architectures and uses these scores to render a graph which can be further filtered by users custom criteria. To be able to specify domains of interest; to see relatives of any protein chain and the domains that they have in common; the more common architectures are closer to the chain of interest; clearly see promiscuous domains compared with those domains that are less widely distributed (extremes); ultimately identify other proteins that have drug-binding domains; find related druggable proteins (defined as proteins with the same proteins architecture as drug targets) and druggable domains; 
+
+We slo present results of analysis of promiscuous domains and architectures.
+
+We begin this introduction by describing protein domains and architectures and why they are important. We then review current techniques for measuring architecture similarity and finally discuss some of the tools available to explore proteins based on their domains and architectures.
+
+
+%}}}
+
+%{{{ protein domains and architectures
+\subsection{Protein domains and architectures}
+A protein domain is defined as ``a structural unit which can be found in multiple protein contexts'' \cite{pfamdb}. A `structural unit' usually refers to a subunit of the protein that can fold to a stable structure when separated from the globular protein. They are fundamental components present in the majority of proteins and they establish sequence or structural similarity for other proteins that share the same domain. Domains found in different proteins often share the same, or comparable, function. If proteins share several of the same domains, it can indicate that those proteins have a common, or related, function and may be evolutionarily related. It is known that the overall functions of two proteins related by jumbled domain architectures are often similar (The geometry of domain combination in proteins, Bashton M, Chothia, C).
+
+A protein's domain architecture, or domain organisation, is the ``collection of domains that are present on a protein'' \cite{pfamdb}, and can be composed of one or more domains. Importantly, the architecture is the \textit{ordered} sequence of domains in a protein. Two proteins may share all the same domains but not share architectures due to a different order of domains. For example, an architecture with order of domains `XYZ' is not the same as the architecture `ZYX' even though they are composed of the same domains. Architectures link evolutionary related proteins \cite{fong} and proteins which share equivalent architectures can be loosely considered as homologous\cite{The geometry of domain combination in proteins, Bashton M, Chothia, C}. Architectures can be used to group proteins rather than on sequence similarity. The combinations of domains into architectures give rise to the diversity we see in proteins. There has been much research into domain combinations and architectures and how they  lead to the particular function of a protein \cite{15 - citation 16,17 pg2}.   
+
+REWRITE-Because of extensive analysis of domain architectures \cite{The geometry of domain combination in proteins, Bashton M, Chothia, C} which show that protein with similar domains are homologs and more distantly related proteins will have different architectures, we can "infer" similarity of protein function and families by comparing their architectures.
+
+There are several resources available for protein sequence domains. Pfam, SMART, CATH, PRODOM, SCOP. For DomVizApp we are using domain architectures from Pfam representing **fillme** sequences. Pfam is a large database of protein families and domains. Database of protein domains and families; represented by profile-HMMs; functional annotation of proteins; review current methods of searching for proteins with domains (i.e. web interface). The biological data is available as flat-files which have to be converted to a graph-based data structure for visualisation.
+%}}}
+
+%{{{ drug targets
+\subsection{Drug targets} Drug development is an example of an area in which protein domains and architectures play an important role. A drug typically binds to a site on target. The targets are often recognisable domains on the protein (druggable domains); a drug that binds to a particular protein's domain is likely to bind to another related protein with the same domain (same family);
+
+Identification of protein binding sites (3D)
+
+Drug targets: ``Drug-target network'' Nature Biotechnology 2007 October Vol. 25 Num. 10; 
+%}}}
+
+%{{{ architecture similarity
+\subsection{Architecture similarity}
+Protein similarity is one of the most studied topics in bioinformatics. However, there is presently no canonical method to measure architecture similarity. Pfam score architecture similarity through a heuristic ranking \cite{pfam2002} of:
+\begin{itemize}
+	\item Number of domains in common, from identical domain architectures,
+	\item Number of domains in common, through re-ordered combinations and
+	\item Smaller number of common domains.
+\end{itemize}
+
+In addition to architectures sharing the same domains, architectures can also share domains that belong to the same clan, later introduced by  Pfam\cite{pfamdb}. Each clan contains domains that are thought to share a common evolutionary ancestor, which have been identified through:
+\begin{itemize}
+	\item Related structure,
+	\item Related function,
+	\item Substantial matches of sequences to HMMs for other families and
+	\item HMM profile-profile comparison.
+\end{itemize}
+
+Each of these elements are used to score a relationship between domains. If the score is deemed significant, the domains are said to be in the same clan.
+
+Other techniques for studying domain architectures include using the concept of fission and fusion of domains to build pathways of protein evolution \cite{fong}. A set of graph tools has also been developed to define the domain organisation of proteins in an entire organism \cite{cado}. The resulting graphs can then be used to compare different organisms. PRODOC \cite{prodoc} is a set of programs that enable comparison of proteins as a sequence of domains. These tools can be used to query the PRODOC dataset to identify proteins with a set of domains or the same domains but in a different order. 
+
+Analysis of protein architectures: ``Modelling the evolution of Protein Domain Architectures Using Maximum Parsimony'' J Mol Biol. 2007 February 9; 366(1): 307-315; ``Comparative Analysis of Protein Domain Organization'' Genome Research 14:343-353;
+%}}}
+
+%{{{ visualisation
+\subsection{Visualisation and its benefits}
+Graphs are a common way to represent structured data with relationships within that data. The data is represented as nodes and relations are edges that connect the nodes. 
+
+"Accurate visualisation of information allows users to quickly and effectively visualise importation features with groups."
+
+"Graphs allow one to browse complex relationships and visualise key features of various grouping."
+
+We use a sophisticated graph layout algorithm to render clear graphs with many nodes and complex relationships.
+
+Pfamalyzer is a Java applet that allows users to explore Pfam architectures by querying the dataset using domains. The results are presented graphically in a ranked list.
+
+\emph{Exploration of Pfam domain architectures:} ``PfamAlyzer: domain-centric homology search'' Bioinformatics Vol. 23 no 24 2007, pgs: 3382-3383.
+
+%}}}
 
