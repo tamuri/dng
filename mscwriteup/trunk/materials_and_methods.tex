@@ -22,7 +22,7 @@
 % FIGURE OF DATA SOURCES -> MYSQL DB WITH NAME OF SCRIPTS
 % FIGURE OF DATABASE SCHEMA
 
-The DomVizApp database was built by importing and linking the following sources: Pfam \cite{pfamdb}, Uniprot \cite{uniprot}, PDB \cite{pdb} and Drugbank \cite{drugbank}.
+The DomVizApp database was built by importing and linking the following data sources: Pfam \cite{pfamdb}, Uniprot \cite{uniprot}, PDB \cite{pdb} and Drugbank \cite{drugbank}.
 
 A collection of Perl modules were written to perform data pre-processing and to import the data into a MySQL\footnote{http://www.mysql.com/} database which acts as the master data store. These Perl scripts allow databases to be created given new data from Pfam, Uniprot or the PDB. Importing the data into a general purpose database allows us to easily integrate our data sources, facilitates flexible querying for analysis and allows for additional annotation in the future. The data sources, import scripts and database schema are illustrated in Figure~\ref{dataimport} and described below.  
 
@@ -35,18 +35,18 @@ A collection of Perl modules were written to perform data pre-processing and to 
 \end{figure}
 
 \subsubsection{Pfam}
-Domains and architectures form the foundation of DomVizApp and were imported from Pfam version 22.0, available from the Pfam FTP site\footnote{ftp://ftp.sanger.ac.uk/pub/databases/Pfam/current\_release/swisspfam.gz}. The swisspfam dataset contains all the domains belonging to a sequence. Domains aren't presented linearly and the file requires additional parsing in order to extract the sequence's architecture. We extracted and loaded the sequence accession, Swissprot name and stored the sequence's architecture as a string with a dot-separated format (e.g. \texttt{D1.D2.D3.D1.D1}). The list of all Pfam clans (Pfam-C.gz) was also imported so that those domains that belonged to clans could be associated with other sibling domains. 
+Domains and architectures form the foundation of DomVizApp and were imported from Pfam version 22.0, available from the Pfam FTP site\footnote{ftp://ftp.sanger.ac.uk/pub/databases/Pfam/current\_release/}. Pfam-A and Pfam-B domains were loaded from their respective definition files\footnote{Pfam-A.seed.gz and Pfam-B.gz}. The swisspfam dataset\footnote{swisspfam.gz} contains 3,126,379 sequences. Each entry lists the Pfam domains identified in the sequence and the residue range over which the domain spans. Domains aren't presented linearly and the file requires additional parsing in order to extract the sequence's architecture. We extracted and loaded the Uniprot code and number and stored the sequence's architecture as a string with a dot-separated format (e.g. \texttt{D1.D2.D3.D1.D1}). The list of all Pfam clans\footnote{Pfam-C.gz} was also imported so that those domains that belonged to clans could be associated with other sibling domains. 
 
-The dataset contains 45,684 distinct architectures (ignoring Pfam-B domains) from 9,318 domains, *fillme* of which are members of one of *fillme* clans.
+The dataset contains 45,764 distinct architectures (ignoring Pfam-B domains) made up from 9,318 separate domains, 1,808 of which are members of one of 283 clans.
 
 \subsubsection{Uniprot}
-In order to link domain architectures to sequences and taxonomy, Uniprot v14.0 (Swissprot 56.0) protein data were imported. The data includes all accession numbers for Swissprot entries, which allows us to link drug targets with Pfam sequence entries. We are also able to group sequences by identical domain organizations. This release contains 392,667 UniprotKB/Swissprot entries. % todo: only swissprot entries?
+In order to link domain architectures to sequences and taxonomy, Uniprot v14.0 (Swissprot 56.0) protein data were imported. The data includes all accession numbers for Swissprot entries, which allows us to link drug targets with Pfam sequence entries.  We also include species data, which is used by DomVizApp to filter architectures. We are also able to group sequences by identical domain organization (i.e. architectures). This release contains 392,667 UniprotKB/Swissprot entries and 6,070,085 unreviewed TrEMBL entries.
 
 \subsubsection{PDB}
-The PDB records were used to determine protein sequences that have had their structure solved. DomVizApp uses this information to allow users to filter for architectures that belong to a sequence that has had its structure determined. Links between PDB chain and Uniprot are only available in separate downloads for each individual chain from the Worldwide Protein Data Bank (wwPDB). Rather than downloading and parsing the full PDB database, we used the PDBSprotEC mappings \cite{pdbsprotec} which are available from the Bioinformatics Group at UCL\footnote{http://www.bioinf.org.uk/pdbsws/}. The dataset has 110,858 PDB chains mapped to *fillme* distinct Swissprot sequences. 
+The PDB data were used to determine protein sequences that have had their structure solved. DomVizApp uses this information to allow users to filter for architectures that belong to a sequence that has had its structure determined. Links between PDB chain and Uniprot sequence are only available in separate downloads for each individual chain from the Worldwide Protein Data Bank (wwPDB). Rather than downloading and parsing the full PDB database, we used the PDBSprotEC mappings \cite{pdbsprotec} which are available from the Bioinformatics Group at UCL\footnote{http://www.bioinf.org.uk/pdbsws/}. The dataset has 110,858 PDB chains mapped to 19,618 distinct Swissprot sequences. 
 
 \subsubsection{DrugBank}
-To analyse the targetting of proteins by drugs, details of drugs and their corresponding targets were obtained from the DrugBank \cite{drugbank} drugset as of 14 June 2008. The full drugcard set contains comprehensive drug data combined with drug-target data, such as sequence, Swissprot identifier and GO classification information. It also includes Pfam domains for each of the targets but it simply lists all the domains belonging to the target, not specifically the domains targetted by the drug. Only approved drug targets were considered in the analysis. The full drugcard set lists 4,764 drugs of which 1,484 are flagged as `Approved'. For our analysis, we only considered human targets. 
+To analyse the targeting of proteins by drugs, details of drugs and their corresponding targets were obtained from the DrugBank \cite{drugbank} drugset as of 14 June 2008. The full drugcard set contains comprehensive drug data combined with drug-target data, such as sequence, Swissprot identifier and GO classification information. It also includes Pfam domains for each of the targets but it simply lists all the domains belonging to the target, not specifically the domains targeted by the drug. Only approved drug targets were considered in the analysis. The full drugcard set lists 4,764 drugs of which 1,484 are flagged as `Approved'.
 
 %}}}
 
@@ -55,15 +55,17 @@ To analyse the targetting of proteins by drugs, details of drugs and their corre
 % DESCRIBE ANALYSIS PERFORMED
 % HOW THEY WERE PERFORMED
 % WHY THEY WERE PERFORMED
-After loading and integrating the different data sources, and having performed the necessary normalization of Pfam and Drugbank sequence accession numbers to the Uniprot primary accession number, we were able to perform some general analysis of the protein domain and architecture landscape. Using progressively selective criteria, we were able to retrieve summary information related to protein sequence Pfam entries, human protein domains and commonly occuring architectures.
+After loading and integrating the different data sources, and having performed the necessary mapping of Pfam and Drugbank sequence accession numbers to the Uniprot primary accession number, we were able to perform some general analysis of the protein domain and architecture landscape. Using progressively selective criteria, we were able to retrieve summary information related to protein sequence Pfam entries, human protein domains and commonly occuring architectures.
 
-For the first stage of analysis, a collection of SQL scripts were written to summarize the number of distinct domains and architectures and how frequently these domains and architectures occurred in sequences. We extracted this information for all species and HomoSapiens.
+For the first stage of analysis, a collection of SQL scripts were written to summarize the number of distinct domains and architectures and how frequently these domains and architectures occurred in sequences. We extracted this information for all species and Homo sapiens.
 
-We also analysed the occurrences of domains in architectures, which required development of MySQL stored procedures as the information could not be retrieved using standard SQL set operations. We obtained these totals by getting a list of distinct domains and then iteratively searching for architectures that contained these domains. We retrieved total and HomoSapien numbers.
+We also analysed the occurrence of domains in architectures to find the most promiscuous domains across all Pfam entries, H. sapiens and drug targets. We obtained these totals by summing each unique domain every time it occured in an architectures, ignore repeats within the same architecture.
 
-As mentioned previously, the purpose of this analysis was to survey the domain architecture landscape. As DomVizApp draws network graphs of related architectures, we wanted to have a sense of how large a typical graph would be (i.e. number of nodes) and what might be the worst case scenario. We were also able to see what types of domains were frequently occuring and investigate what was their related function.
+As mentioned previously, the purpose of this analysis was to survey the domain architecture landscape. As DomVizApp draws network graphs of related architectures, we wanted to have a sense of how large a typical graph would be (i.e. number of nodes) and what might be the worst case scenario. We were also able to see what types of domains were frequently occurring and investigate what was their related function.
 
-The second stage of analysis was to investigate the possible number of `druggable' proteins in the human genome. Using the current DrugBank drug-target data we found the number of approved drugs currently targetting human proteins. We then retrieved additional protein sequences that had the same architecture as drug-targets but weren't currently targetted by any drugs.
+\subsubsection{Druggable proteins}
+
+The second stage of analysis was to investigate the possible number of `druggable' proteins in the human genome. Using the current DrugBank drug-target data we found the number of human drug targets targeted by approved drugs. We then retrieved additional protein sequences that had the same architecture as drug-targets but weren't currently targeted by any drugs.
 
 To improve the number of probable druggable proteins, we should also include those sequences which have some of the domains (or all domains but in a different architecture) that specifically bind the drug. However, Drugbank does not currently state explicitly which domain the drug targets. We calculated the number of sequences that contain one or more of the same domains as the drug-target protein. This is likely to return an inflated figure of druggable targets as it is unlikely that a drug targets all the domains in a target protein.
 
@@ -74,7 +76,7 @@ This shortcoming is a reason that one of the goals of DomVizApp is to assist bio
 %{{{ implementation
 \subsection{DomVizApp implementation}
 % EVERYTHING THAT THE APPLICATION DOES AND USES
-DomVizApp was wriiten in Java, using JDK 1.6. We used the Lucene search toolkit\footnote{http://lucene.apache.org/}, which was used to create high-performance search indexes of the biological data. The Prefuse toolkit \cite{prefuse}, a visualization framework for Java, was used to model graph data and visualize the network graph.
+DomVizApp was wriiten in Java, using JDK 1.6. We used the Lucene search toolkit\footnote{http://lucene.apache.org/} to create high-performance search indexes of the biological data. The Prefuse toolkit \cite{prefuse}, a visualization framework for Java, was used to model graph data and visualize the network graph.
 
 \subsubsection{Data preparation and indexing}
 % Details of what the Lucene engine does for you and how exactly you used it for indexing your data
@@ -84,7 +86,7 @@ As DomVizApp runs as a desktop application, we desired a solution that did not n
 
 Lucene is a library for high-performance creation and searching of text indexes. By taking data from the master MySQL database and producing a Lucene index, we were able to have a separate, transferable, set of files that could be distributed to user's workstations. All the necessary information would be available locally to the user and this would facilitate the dynamic nature of DomVizApp.
 
-The first stage was the indexing of our master data to create a searchable index. A Lucene index is stored as set of index files containing an inverted index data structure that allows rapid searching of text words. We interated through each sequence in Pfam, collecting data associated with it, such as its architecture and whether its structure has been solved, to create a Lucene \texttt{Document} which is a collection of fields. Each piece of Pfam data was stored as a field in the sequence Document.
+The first stage was the indexing of our master data to create a searchable index. A Lucene index is stored as set of index files containing an inverted index data structure that allows rapid searching of text words. We iterated through each sequence in Pfam, collecting data associated with it, such as its architecture and whether its structure has been solved, to create a Lucene \texttt{Document} which is a collection of fields. Each piece of Pfam data was stored as a field in the sequence Document.
 
 We similarly created Documents for domain data, holding the Pfam domain identifier and its clan associations. 
 
