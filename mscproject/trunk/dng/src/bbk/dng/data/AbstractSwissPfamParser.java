@@ -18,7 +18,8 @@ public abstract class AbstractSwissPfamParser {
     }
 
     public void parse(String filePath) throws Exception {
-        System.out.println(filePath);
+        System.out.printf("Parsing %s\n", filePath);
+        
         // Set up regex patterns
         Pattern startEntryPattern = Pattern.compile("^>(\\w+)\\s+\\|=+\\|\\s+\\b(\\w+)\\b");
         Pattern domainPattern = Pattern.compile("^([\\w\\-]+)\\s+\\d+[\\s\\-]+\\(\\d+\\)\\s\\b(\\w+)\\b(?:.+)\\s\\s(.+)$");
@@ -77,5 +78,5 @@ public abstract class AbstractSwissPfamParser {
         }
     }
 
-    protected abstract void actionPfamEntry(String proteinId, String proteinAccession, Map<Integer, String> domains);
+    protected abstract void actionPfamEntry(String proteinId, String proteinAccession, Map<Integer, String> domains) throws Exception;
 }
