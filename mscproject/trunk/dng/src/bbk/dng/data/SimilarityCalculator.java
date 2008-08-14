@@ -6,7 +6,11 @@ import java.util.*;
  * Date: 14-Aug-2008 11:08:16
  */
 public class SimilarityCalculator {
-    final static Double GAP = -5.0;
+    final static Double GAP_SCORE = -5.0;
+    final static Double MATCH_SCORE = 20.0;
+    final static Double PF_SIMILAR_SCORE = 5.0;
+    final static Double PB_SIMILAR_SCORE = 2.0;
+    final static Double MISMATCH_SCORE = 0.0;
 
     public SimilarityCalculator() {
 
@@ -76,11 +80,11 @@ public class SimilarityCalculator {
                 alignedDomainsY.add(domainY);
                 x--;
                 y--;
-            } else if (score == scoreLeft + GAP) {
+            } else if (score == scoreLeft + GAP_SCORE) {
                 alignedDomainsX.add(domainX);
                 alignedDomainsY.add("GAP");
                 x--;
-            } else if (score == scoreUp + GAP) {
+            } else if (score == scoreUp + GAP_SCORE) {
                 alignedDomainsX.add("GAP");
                 alignedDomainsY.add(domainY);
                 y--;
@@ -121,13 +125,13 @@ public class SimilarityCalculator {
         }
 
 
-        double score = 2.0 * (matches + similar / 10.0 - gaps / Math.abs(GAP)) / (domainsOne.size() + domainsTwo.size());
+        double score = 2.0 * (matches + similar / 10.0 - gaps / Math.abs(GAP_SCORE)) / (domainsOne.size() + domainsTwo.size());
 
         // print the alignment
         System.out.printf("\n\n");
-        for (String s : alignedDomainsX) System.out.printf("%s\t", s);
+        for (String s : alignedDomainsX) System.out.printf("%s\t\t", s);
         System.out.printf("\n");
-        for (String s : alignedDomainsY) System.out.printf("%s\t", s);
+        for (String s : alignedDomainsY) System.out.printf("%s\t\t", s);
         System.out.printf("\n\n");
 
         System.out.printf("%s matches, %s similar, %s gaps, %s mismatches = score %s\n\n",
@@ -144,9 +148,9 @@ public class SimilarityCalculator {
         double[][] matrix = new double[domainsX.size() + 1][domainsY.size() + 1];
 
         // Fill the first row and first column with gap values
-        for (int x = 0; x < domainsX.size() + 1; x++) matrix[x][0] = GAP * x;
+        for (int x = 0; x < domainsX.size() + 1; x++) matrix[x][0] = GAP_SCORE * x;
 
-        for (int y = 0; y < domainsY.size() + 1 ; y++) matrix[0][y] = GAP * y;
+        for (int y = 0; y < domainsY.size() + 1 ; y++) matrix[0][y] = GAP_SCORE * y;
 
         // Fill the rest of the array
         for (int x = 1; x < domainsX.size() + 1; x++) {
@@ -155,8 +159,8 @@ public class SimilarityCalculator {
                 String domainY = domainsY.get(y - 1);
 
                 double k = matrix[x - 1][y - 1] + domainSimilarities.get(new DomainKey(domainX, domainY));
-                double l = matrix[x - 1][y] + GAP;
-                double m = matrix[x][y - 1] + GAP;
+                double l = matrix[x - 1][y] + GAP_SCORE;
+                double m = matrix[x][y - 1] + GAP_SCORE;
 
                 matrix[x][y] = Math.max(k, Math.max(l, m));
             }
@@ -175,16 +179,16 @@ public class SimilarityCalculator {
                 DomainKey key = new DomainKey(domain1, domain2);
                 // if this pair of domains is equivalent
                 if (domain1.equals(domain2)) {
-                    domainSimilarities.put(key, 10.0);
+                    domainSimilarities.put(key, MATCH_SCORE);
                 } else if (domain1.substring(0,2).equals("PF") && domain2.substring(0,2).equals("PF")) {
                     // if both are Pfam-A
-                    domainSimilarities.put(key, 3.0);
+                    domainSimilarities.put(key, PF_SIMILAR_SCORE);
                 } else if (domain2.substring(0,2).equals("PB") && domain2.substring(0,2).equals("PB")) {
                     // if both are Pfam-B
-                    domainSimilarities.put(key, 1.0);
+                    domainSimilarities.put(key, PB_SIMILAR_SCORE);
                 } else {
                     // domains don't match
-                    domainSimilarities.put(key, 0.0);
+                    domainSimilarities.put(key, MISMATCH_SCORE);
                 }
             }
         }
