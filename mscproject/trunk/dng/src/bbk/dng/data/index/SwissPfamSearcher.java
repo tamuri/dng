@@ -33,7 +33,7 @@ public class SwissPfamSearcher {
     public ArrayList<String> getArchitecturesByDomains(ArrayList<String> domains) throws Exception {
         StringBuffer q = new StringBuffer();
         for (String d: domains) {
-            q.append(" +architecture:").append(d);
+            q.append(" architecture:").append(d);
         }
         Hits hits = architectureSearcher.search(architectureParser.parse(q.toString()));
 
