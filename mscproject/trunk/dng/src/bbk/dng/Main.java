@@ -8,9 +8,12 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Random;
 
 import prefuse.data.Graph;
 import prefuse.data.Node;
+import prefuse.visual.VisualItem;
+import prefuse.Constants;
 
 /**
  * Date: 13-Aug-2008 15:11:13
@@ -54,29 +57,45 @@ public class Main {
         button1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.out.printf("You typed '%s'\n", textField1.getText());
+                ArrayList<String> architectures = null;
                 try {
+                    // find domains for this sequence
                     ArrayList<String> domains = searcher.getDomainsBySequence(textField1.getText());
                     for (String d: domains) {
                         System.out.printf("%s\n", d);
                     }
+
+                    // find architectures with these domains
+                    architectures = searcher.getArchitecturesByDomains(domains);
+                    for (String a:architectures) {
+                        System.out.printf("%s\n", a);
+                    }
+
                 } catch (Exception ex) {
                     System.out.printf("Error searching with SwissPfamSearcher.\n");
                 }
 
-                graphPanel.getVisualization().removeGroup("graph");
-                Graph g = new Graph();
-                for ( int i=0; i<3; ++i ) {
-                    Node n1 = g.addNode();
-                    Node n2 = g.addNode();
-                    Node n3 = g.addNode();
-                    g.addEdge(n1, n2);
-                    g.addEdge(n1, n3);
-                    g.addEdge(n2, n3);
+                Random r = new Random();
+                int count = 1;
+
+                if (architectures != null) {
+                    System.out.printf("here");
+                    Graph g = new Graph();
+
+                    for (String a: architectures) {
+                        Node n1 = g.addNode();
+                        int i = r.nextInt(count);
+                        g.addEdge(n1, g.getNode(i));
+                        count++;
+                    }
+
+    //                g.addEdge(3, 6);
+    //                g.addEdge(6, 0);
+                    graphPanel.getVisualization().removeGroup("graph");
+                    graphPanel.getVisualization().addGraph("graph", g);
+                    graphPanel.getVisualization().setValue("graph.nodes", null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
                 }
-//                g.addEdge(0, 3);
-//                g.addEdge(3, 6);
-//                g.addEdge(6, 0);
-                graphPanel.getVisualization().addGraph("graph", g);
+
                // graphPanel.getVisualization().repaint();
                 graphPanel.getVisualization().run("layout");
 
