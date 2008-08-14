@@ -4,21 +4,19 @@ import bbk.dng.graph.GraphTestPanel;
 import bbk.dng.graph.ArchitectureGraphBuilder;
 import bbk.dng.data.index.SwissPfamSearcher;
 import bbk.dng.data.SimilarityCalculator;
-import bbk.dng.data.KeyPair;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.Map;
 import java.util.Iterator;
 
 import prefuse.data.Graph;
-import prefuse.data.Node;
 import prefuse.visual.VisualItem;
 import prefuse.Constants;
+import com.mallardsoft.tuple.Pair;
 
 /**
  * Date: 13-Aug-2008 15:11:13
@@ -27,7 +25,6 @@ public class Main {
     private JTextField textField1;
     private SwissPfamSearcher searcher;
     private GraphTestPanel graphPanel;
-    private SimilarityCalculator similarityCalculator;
 
     Main() {
         try {
@@ -54,6 +51,7 @@ public class Main {
 		((GridBagLayout)inputPanel.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
         
         textField1 = new JTextField();
+        textField1.setText("Q8GBW6");
         inputPanel.add(textField1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
 			GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 			new Insets(0, 0, 0, 0), 0, 0));
@@ -102,7 +100,7 @@ public class Main {
         if (architectures != null) {
 
             SimilarityCalculator calculator = new SimilarityCalculator();
-            Map<KeyPair, Double> similarityMatrix = calculator.getArchitectureSimilarityMatrix(architectures);
+            Map<Pair<String,String>, Double> similarityMatrix = calculator.getArchitectureSimilarityMatrix(architectures);
 
             ArchitectureGraphBuilder graphBuilder = new ArchitectureGraphBuilder();
             Graph g = graphBuilder.initialiseGraph(architectures);

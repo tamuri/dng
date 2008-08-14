@@ -6,9 +6,9 @@ import prefuse.data.Table;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
-import bbk.dng.data.KeyPair;
+import com.mallardsoft.tuple.Pair;
+import com.mallardsoft.tuple.Tuple;
 
 /**
  * Date: 14-Aug-2008 14:33:23
@@ -33,7 +33,7 @@ public class ArchitectureGraphBuilder {
         return g;
     }
 
-    public Graph addEdgesByMatrix(Graph g, Map<KeyPair, Double> matrix, String parentArchitecture) {
+    public Graph addEdgesByMatrix(Graph g, Map<Pair<String,String>, Double> matrix, String parentArchitecture) {
         Table graphTable = g.getNodeTable();
 
         ArrayList<String> connected = new ArrayList<String>();
@@ -59,35 +59,34 @@ public class ArchitectureGraphBuilder {
             System.out.printf("Unconnected:%s\n",unconnected.size());
             double maxscore = -999999;
             ArrayList<String> targetsToRemove = new ArrayList<String>();
-            ArrayList<KeyPair> toConnect = new ArrayList<KeyPair>();
-
+            ArrayList<Pair<Integer,Integer>> toConnect = new ArrayList<Pair<Integer,Integer>>();
 
             for (String c: connected) {
                 // find highest scoring pair for 'c' in connected architectures
-                for (KeyPair key: matrix.keySet()) {
-                    if (key.keyOne.equals(c) && !key.keyTwo.equals(c) && unconnected.contains(key.keyTwo)) {
+                for (Pair<String,String> key: matrix.keySet()) {
+                    if (Tuple.get1(key).equals(c) && !Tuple.get2(key).equals(c) && unconnected.contains(Tuple.get2(key))) {
                         if (matrix.get(key) > maxscore) {
                             maxscore = matrix.get(key);
                             toConnect.clear();
                             targetsToRemove.clear();
-                            toConnect.add(new KeyPair(architectureNodeId.get(c).toString(), architectureNodeId.get(key.keyTwo).toString()));
-                            targetsToRemove.add(key.keyTwo);
-                            System.out.printf("adding clear (%s): %s -> %s\n", matrix.get(key), key.keyOne, key.keyTwo);
+                            toConnect.add(Tuple.from(architectureNodeId.get(c), architectureNodeId.get(Tuple.get2(key))));
+                            targetsToRemove.add(Tuple.get2(key));
+                            System.out.printf("adding clear (%s): %s -> %s\n", matrix.get(key), Tuple.get1(key), Tuple.get2(key));
                         } else if (matrix.get(key) == maxscore) {
-                            toConnect.add(new KeyPair(architectureNodeId.get(c).toString(), architectureNodeId.get(key.keyTwo).toString()));
-                            targetsToRemove.add(key.keyTwo);
-                            System.out.printf("adding existing (%s): %s -> %s\n", matrix.get(key), key.keyOne, key.keyTwo);
+                            toConnect.add(Tuple.from(architectureNodeId.get(c), architectureNodeId.get(Tuple.get2(key))));
+                            targetsToRemove.add(Tuple.get2(key));
+                            System.out.printf("adding existing (%s): %s -> %s\n", matrix.get(key), Tuple.get1(key), Tuple.get2(key));
                         }
                     }
                 }
             }
 
             if (targetsToRemove.size() > 0 && toConnect.size() > 0) {
-                for(KeyPair nodePair: toConnect) {
+                for(Pair<Integer,Integer> nodePair: toConnect) {
                     int row = edgeTable.addRow();
-                    System.out.printf("joining %s -> %s\n", nodePair.keyOne, nodePair.keyTwo);
-                    edgeTable.setInt(row, "source", Integer.parseInt(nodePair.keyOne));
-                    edgeTable.setInt(row, "target", Integer.parseInt(nodePair.keyTwo));
+                    System.out.printf("joining %s -> %s\n", Tuple.get1(nodePair), Tuple.get2(nodePair));
+                    edgeTable.setInt(row, "source", Tuple.get1(nodePair));
+                    edgeTable.setInt(row, "target", Tuple.get2(nodePair));
                 }
 
                 for(String target: targetsToRemove) {

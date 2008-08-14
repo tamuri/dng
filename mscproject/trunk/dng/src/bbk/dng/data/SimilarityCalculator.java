@@ -1,5 +1,8 @@
 package bbk.dng.data;
 
+import com.mallardsoft.tuple.Pair;
+import com.mallardsoft.tuple.Tuple;
+
 import java.util.*;
 
 /**
@@ -17,20 +20,20 @@ public class SimilarityCalculator {
 
     }
 
-    public Map<KeyPair, Double> getArchitectureSimilarityMatrix(ArrayList<String> architectures) {
-        // Given an array list of distinct architectures, returns a Map (with key of keyTwo
+    public Map<Pair<String,String>, Double> getArchitectureSimilarityMatrix(ArrayList<String> architectures) {
+        // Given an array list of distinct architectures, returns a Map (with key of two
         // architectures) of similarity scores
 
-        Map<KeyPair, Double> similarityMatrix = initialiseArchitectureSimilarityMatrix(architectures);
-        Set<KeyPair> archKeys = similarityMatrix.keySet();
+        Map<Pair<String,String>, Double> similarityMatrix = initialiseArchitectureSimilarityMatrix(architectures);
+        Set<Pair<String,String>> archKeys = similarityMatrix.keySet();
 
         // Loop over each key
-        for (KeyPair archKey: archKeys) {
-            // If the keyTwo architectures are identical
-            if (archKey.keyOne.equals(archKey.keyTwo)) {
+        for (Pair<String,String> archKey: archKeys) {
+            // If the two architectures are identical
+            if (Tuple.get1(archKey).equals(Tuple.get2(archKey))) {
                 similarityMatrix.put(archKey, 100.0);
             } else {
-                Double similarity = getArchitectureSimilarity(archKey.keyOne, archKey.keyTwo);
+                Double similarity = getArchitectureSimilarity(Tuple.get1(archKey), Tuple.get2(archKey));
                 similarityMatrix.put(archKey, similarity);
             }
         }
@@ -44,12 +47,12 @@ public class SimilarityCalculator {
         ArrayList<String> domainsTwo = new ArrayList<String>(Arrays.asList(archTwo.split("\\s")));
 
         // get similarity matrix
-        Map<KeyPair, Double> domainSimilarities = getDomainSimilarities(domainsOne, domainsTwo);
+        Map<Pair<String,String>, Double> domainSimilarities = getDomainSimilarities(domainsOne, domainsTwo);
 
         double[][] similarityMatrix = buildDomainSimilarityMatrix(domainsOne, domainsTwo, domainSimilarities);
 
         // print the domain matrix
-        printDomainSimilarityMatrix(domainsOne, domainsTwo, similarityMatrix);
+        //printDomainSimilarityMatrix(domainsOne, domainsTwo, similarityMatrix);
 
 
 
@@ -58,8 +61,8 @@ public class SimilarityCalculator {
     }
 
     private double getArchitectureAlignmentScore(ArrayList<String> domainsOne, ArrayList<String> domainsTwo,
-                                                 double[][] similarityMatrix, Map<KeyPair, Double> domainSimilarities) {
-        // Perform the Needleman-Wunsch alignment on these keyTwo architectures given the domain similarity matrix
+                                                 double[][] similarityMatrix, Map<Pair<String,String>, Double> domainSimilarities) {
+        // Perform the Needleman-Wunsch alignment on these two architectures given the domain similarity matrix
         int x = domainsOne.size();
         int y = domainsTwo.size();
 
@@ -77,7 +80,7 @@ public class SimilarityCalculator {
             double scoreUp = similarityMatrix[x][y-1];
             double scoreLeft = similarityMatrix[x-1][y];
 
-            if (score == scoreDiagonal + domainSimilarities.get(new KeyPair(domainX, domainY))) {
+            if (score == scoreDiagonal + domainSimilarities.get(Tuple.from(domainX, domainY))) {
                 alignedDomainsX.add(domainX);
                 alignedDomainsY.add(domainY);
                 x--;
@@ -130,14 +133,14 @@ public class SimilarityCalculator {
         double score = 2.0 * (matches + similar / 10.0 - gaps / Math.abs(GAP_SCORE)) / (domainsOne.size() + domainsTwo.size());
 
         // print the alignment
-        System.out.printf("\n\n");
-        for (String s : alignedDomainsX) System.out.printf("%s\t\t", s);
-        System.out.printf("\n");
-        for (String s : alignedDomainsY) System.out.printf("%s\t\t", s);
-        System.out.printf("\n\n");
-
-        System.out.printf("%s matches, %s similar, %s gaps, %s mismatches = score %s\n\n",
-                matches, similar, gaps, mismatches, score);
+//        System.out.printf("\n\n");
+//        for (String s : alignedDomainsX) System.out.printf("%s\t\t", s);
+//        System.out.printf("\n");
+//        for (String s : alignedDomainsY) System.out.printf("%s\t\t", s);
+//        System.out.printf("\n\n");
+//
+//        System.out.printf("%s matches, %s similar, %s gaps, %s mismatches = score %s\n\n",
+//                matches, similar, gaps, mismatches, score);
 
         return score * 100.0;
     }
@@ -145,7 +148,7 @@ public class SimilarityCalculator {
 
     private double[][] buildDomainSimilarityMatrix(ArrayList<String> domainsX,
                                                    ArrayList<String> domainsY,
-                                                   Map<KeyPair, Double> domainSimilarities) {
+                                                   Map<Pair<String,String>, Double> domainSimilarities) {
         // Build matrix for these alignment
         double[][] matrix = new double[domainsX.size() + 1][domainsY.size() + 1];
 
@@ -160,7 +163,7 @@ public class SimilarityCalculator {
                 String domainX = domainsX.get(x - 1);
                 String domainY = domainsY.get(y - 1);
 
-                double k = matrix[x - 1][y - 1] + domainSimilarities.get(new KeyPair(domainX, domainY));
+                double k = matrix[x - 1][y - 1] + domainSimilarities.get(Tuple.from(domainX, domainY));
                 double l = matrix[x - 1][y] + GAP_SCORE;
                 double m = matrix[x][y - 1] + GAP_SCORE;
 
@@ -170,27 +173,26 @@ public class SimilarityCalculator {
         return matrix;
     }
 
-    private Map<KeyPair, Double> getDomainSimilarities(ArrayList<String> domainsOne, ArrayList<String> domainsTwo) {
-        Map<KeyPair, Double> domainSimilarities = new HashMap<KeyPair, Double>();
+    private Map<Pair<String,String>, Double> getDomainSimilarities(ArrayList<String> domainsOne, ArrayList<String> domainsTwo) {
+        Map<Pair<String,String>, Double> domainSimilarities = new HashMap<Pair<String,String>, Double>();
 
         // for each domain in architecture 1
         for (String domain1: domainsOne) {
             // for each domain in architecture 2
             for (String domain2: domainsTwo) {
-                //String[] key = new String[]{domain1, domain2};
-                KeyPair keyPair = new KeyPair(domain1, domain2);
+                Pair<String,String> key = Tuple.from(domain1, domain2);
                 // if this pair of domains is equivalent
                 if (domain1.equals(domain2)) {
-                    domainSimilarities.put(keyPair, MATCH_SCORE);
+                    domainSimilarities.put(key, MATCH_SCORE);
                 } else if (domain1.substring(0,2).equals("PF") && domain2.substring(0,2).equals("PF")) {
                     // if both are Pfam-A
-                    domainSimilarities.put(keyPair, PF_SIMILAR_SCORE);
+                    domainSimilarities.put(key, PF_SIMILAR_SCORE);
                 } else if (domain2.substring(0,2).equals("PB") && domain2.substring(0,2).equals("PB")) {
                     // if both are Pfam-B
-                    domainSimilarities.put(keyPair, PB_SIMILAR_SCORE);
+                    domainSimilarities.put(key, PB_SIMILAR_SCORE);
                 } else {
                     // domains don't match
-                    domainSimilarities.put(keyPair, MISMATCH_SCORE);
+                    domainSimilarities.put(key, MISMATCH_SCORE);
                 }
             }
         }
@@ -200,12 +202,12 @@ public class SimilarityCalculator {
         return domainSimilarities;
     }
 
-    private Map<KeyPair, Double> initialiseArchitectureSimilarityMatrix(ArrayList<String> architectures) {
-        Map<KeyPair, Double> matrix = new HashMap<KeyPair, Double>();
+    private Map<Pair<String,String>, Double> initialiseArchitectureSimilarityMatrix(ArrayList<String> architectures) {
+        Map<Pair<String,String>, Double> matrix = new HashMap<Pair<String,String>, Double>();
 
         for (String archRow: architectures) {
             for (String archColumn: architectures) {
-                KeyPair key = new KeyPair(archRow, archColumn);
+                Pair<String,String> key = Tuple.from(archRow, archColumn);
                 matrix.put(key, 0.0);
             }
         }
