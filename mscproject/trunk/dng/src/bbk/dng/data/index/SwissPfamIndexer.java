@@ -3,6 +3,7 @@ package bbk.dng.data.index;
 import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.document.Document;
@@ -14,16 +15,11 @@ import java.util.*;
  * Date: 13-Aug-2008 12:18:16
  */
 public class SwissPfamIndexer extends AbstractSwissPfamParser {
-    private static final String INDEX_DIR = "/home/aut/Documents/Mental/Bioinformatics/project/dng/data_index/";
+    public static final String INDEX_DIR = "/home/aut/Documents/Mental/Bioinformatics/project/dng/data_index/";
     private IndexWriter writer;
 
     protected void actionAllDomains(Map<String, Map> allDomains) throws Exception {
-        // Lucene index
-        PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new StandardAnalyzer());
-        analyzer.addAnalyzer("accession", new KeywordAnalyzer());
-        analyzer.addAnalyzer("id", new KeywordAnalyzer());
-        analyzer.addAnalyzer("description", new StandardAnalyzer());
-
+        PerFieldAnalyzerWrapper analyzer = getDomainIndexAnalyzer();
         IndexWriter domainIndexWriter = new IndexWriter(INDEX_DIR + "domains", analyzer, true);
 
         for (String domain: allDomains.keySet()) {
@@ -62,13 +58,24 @@ public class SwissPfamIndexer extends AbstractSwissPfamParser {
     }
 
     private void createIndex() throws Exception {
-        // Lucene index
+        PerFieldAnalyzerWrapper analyzer = getArchitectureIndexAnalyzer();
+        writer = new IndexWriter(INDEX_DIR + "architectures", analyzer, true);
+    }
+
+    public PerFieldAnalyzerWrapper getArchitectureIndexAnalyzer() {
         PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new StandardAnalyzer());
         analyzer.addAnalyzer("id", new KeywordAnalyzer());
         analyzer.addAnalyzer("accession", new KeywordAnalyzer());
         analyzer.addAnalyzer("architecture", new WhitespaceAnalyzer());
+        return analyzer;
+    }
 
-        writer = new IndexWriter(INDEX_DIR + "architectures", analyzer, true);
+    public PerFieldAnalyzerWrapper getDomainIndexAnalyzer() {
+        PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new StandardAnalyzer());
+        analyzer.addAnalyzer("accession", new KeywordAnalyzer());
+        analyzer.addAnalyzer("id", new KeywordAnalyzer());
+        analyzer.addAnalyzer("description", new StandardAnalyzer());
+        return analyzer;
     }
 
     public static void main(String[] args) throws Exception {
@@ -86,4 +93,6 @@ public class SwissPfamIndexer extends AbstractSwissPfamParser {
         writer.optimize();
         writer.close();
     }
+
+
 }

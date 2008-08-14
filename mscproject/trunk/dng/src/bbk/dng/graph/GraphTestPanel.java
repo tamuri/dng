@@ -35,6 +35,9 @@ public class GraphTestPanel extends JPanel {
     public static final String NODES = "graph.nodes";
     public static final String EDGES = "graph.edges";
     public static final String AGGR = "aggregates";
+
+    private Visualization m_vis;
+
     public GraphTestPanel() {
         super(new BorderLayout());
 
@@ -53,7 +56,7 @@ public class GraphTestPanel extends JPanel {
         g.addEdge(6, 0);
 
         // new empty visualisation
-        Visualization m_vis = new Visualization();
+        m_vis = new Visualization();
 
         // add visual data groups
         VisualGraph vg = m_vis.addGraph(GRAPH, g);
@@ -143,6 +146,10 @@ public class GraphTestPanel extends JPanel {
 
         
         add(display);
+    }
+
+    public Visualization getVisualization() {
+        return m_vis;
     }
 
 }
