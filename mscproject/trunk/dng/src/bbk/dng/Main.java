@@ -1,8 +1,10 @@
 package bbk.dng;
 
 import bbk.dng.graph.GraphTestPanel;
+import bbk.dng.graph.ArchitectureGraphBuilder;
 import bbk.dng.data.index.SwissPfamSearcher;
 import bbk.dng.data.SimilarityCalculator;
+import bbk.dng.data.KeyPair;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Map;
 
 import prefuse.data.Graph;
 import prefuse.data.Node;
@@ -94,19 +97,14 @@ public class Main {
             System.out.printf("Error searching with SwissPfamSearcher.\n");
         }
 
-        Random r = new Random();
-        int count = 1;
-
         if (architectures != null) {
-            System.out.printf("here");
-            Graph g = new Graph();
 
-            for (String a: architectures) {
-                Node n1 = g.addNode();
-                int i = r.nextInt(count);
-                g.addEdge(n1, g.getNode(i));
-                count++;
-            }
+            SimilarityCalculator calculator = new SimilarityCalculator();
+            Map<KeyPair, Double> similarityMatrix = calculator.getArchitectureSimilarityMatrix(architectures);
+
+            ArchitectureGraphBuilder graphBuilder = new ArchitectureGraphBuilder();
+            Graph g = graphBuilder.initialiseGraph(architectures);
+            graphBuilder.
 
             graphPanel.getVisualization().removeGroup("graph");
             graphPanel.getVisualization().addGraph("graph", g);
