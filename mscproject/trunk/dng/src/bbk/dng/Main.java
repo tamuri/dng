@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Map;
+import java.util.Iterator;
 
 import prefuse.data.Graph;
 import prefuse.data.Node;
@@ -80,9 +81,10 @@ public class Main {
     private void button1ActionPerformed(ActionEvent e) {
         System.out.printf("You typed '%s'\n", textField1.getText());
         ArrayList<String> architectures = null;
+        ArrayList<String> domains = null;
         try {
             // find domains for this sequence
-            ArrayList<String> domains = searcher.getDomainsBySequence(textField1.getText());
+            domains = searcher.getDomainsBySequence(textField1.getText());
             for (String d: domains) {
                 System.out.printf("%s\n", d);
             }
@@ -104,7 +106,7 @@ public class Main {
 
             ArchitectureGraphBuilder graphBuilder = new ArchitectureGraphBuilder();
             Graph g = graphBuilder.initialiseGraph(architectures);
-            graphBuilder.
+            graphBuilder.addEdgesByMatrix(g, similarityMatrix,  joinDomainsForArchitecture(domains));
 
             graphPanel.getVisualization().removeGroup("graph");
             graphPanel.getVisualization().addGraph("graph", g);
@@ -113,6 +115,15 @@ public class Main {
 
         // graphPanel.getVisualization().repaint();
         graphPanel.getVisualization().run("layout");
+    }
+
+    private String joinDomainsForArchitecture(ArrayList<String> domains) {
+        Iterator<String> iter = domains.iterator();
+        StringBuffer architecture = new StringBuffer(iter.next());
+        // we're using whitespace analyser to store architectures - separate by space
+        while (iter.hasNext()) architecture.append(" ").append(iter.next());
+
+        return architecture.toString();
     }
 
     public static void main(String[] args) {
