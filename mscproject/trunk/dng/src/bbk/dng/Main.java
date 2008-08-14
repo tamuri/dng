@@ -2,6 +2,7 @@ package bbk.dng;
 
 import bbk.dng.graph.GraphTestPanel;
 import bbk.dng.data.index.SwissPfamSearcher;
+import bbk.dng.data.SimilarityCalculator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +23,7 @@ public class Main {
     private JTextField textField1;
     private SwissPfamSearcher searcher;
     private GraphTestPanel graphPanel;
+    private SimilarityCalculator similarityCalculator;
 
     Main() {
         try {
