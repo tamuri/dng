@@ -52,7 +52,6 @@ public class ArchitectureGraphBuilder {
         }
 
         Table edgeTable = g.getEdgeTable();
-        edgeTable.addColumn("name", String.class);
 
         while (unconnected.size() > 0) {
 
@@ -70,11 +69,11 @@ public class ArchitectureGraphBuilder {
                             targetsToRemove.clear();
                             toConnect.add(Tuple.from(architectureNodeId.get(c), architectureNodeId.get(Tuple.get2(key))));
                             targetsToRemove.add(Tuple.get2(key));
-                            //System.out.printf("adding clear (%s): %s -> %s\n", matrix.get(key), Tuple.get1(key), Tuple.get2(key));
-                        } else if (matrix.get(key) == maxscore) {
+                        } else if (matrix.get(key) == maxscore && c.equals(parentArchitecture)) {
+                            toConnect.clear();
+                            targetsToRemove.clear();
                             toConnect.add(Tuple.from(architectureNodeId.get(c), architectureNodeId.get(Tuple.get2(key))));
                             targetsToRemove.add(Tuple.get2(key));
-                            //System.out.printf("adding existing (%s): %s -> %s\n", matrix.get(key), Tuple.get1(key), Tuple.get2(key));
                         }
                     }
                 }
@@ -98,7 +97,7 @@ public class ArchitectureGraphBuilder {
                         }
                     }
 
-                    for (String t: tmp) {
+                    for (String t: targetsToRemove) {
                         boolean b = unconnected.remove(t);
                         System.out.printf("removed %s - %s\n", b, t);
                     }

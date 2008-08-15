@@ -23,6 +23,7 @@ import prefuse.render.Renderer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.util.Iterator;
 
 /**
@@ -138,6 +139,15 @@ public class GraphTestPanel extends JPanel {
         display.addControlListener(new ZoomControl());
         display.addControlListener(new PanControl());
         display.addControlListener(new DragControl());
+
+        display.addControlListener(
+                new ControlAdapter() {
+                    public void itemClicked(VisualItem item, MouseEvent evt) {
+                        System.out.printf("%s\n", item.getString("name"));
+                    }
+                }
+        );
+
         // set things running
         m_vis.run("layout");
 
