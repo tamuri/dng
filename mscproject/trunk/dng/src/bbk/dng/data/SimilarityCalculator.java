@@ -23,12 +23,14 @@ public class SimilarityCalculator {
     public Map<Pair<String,String>, Double> getArchitectureSimilarityMatrix(ArrayList<String> architectures) {
         // Given an array list of distinct architectures, returns a Map (with key of two
         // architectures) of similarity scores
-
         Map<Pair<String,String>, Double> similarityMatrix = initialiseArchitectureSimilarityMatrix(architectures);
         Set<Pair<String,String>> archKeys = similarityMatrix.keySet();
 
+        int count=0;
         // Loop over each key
         for (Pair<String,String> archKey: archKeys) {
+            count++;
+            System.out.printf("%s/%s = %s\n", count, archKeys.size(), ((100 * ((double) count/ (double)archKeys.size()))));
             // If the two architectures are identical
             if (Tuple.get1(archKey).equals(Tuple.get2(archKey))) {
                 similarityMatrix.put(archKey, 100.0);
@@ -203,6 +205,7 @@ public class SimilarityCalculator {
     }
 
     private Map<Pair<String,String>, Double> initialiseArchitectureSimilarityMatrix(ArrayList<String> architectures) {
+        System.out.printf("initialiseArchitectureSimilarityMatrix");
         Map<Pair<String,String>, Double> matrix = new HashMap<Pair<String,String>, Double>();
 
         for (String archRow: architectures) {

@@ -7,8 +7,6 @@ import bbk.dng.data.SimilarityCalculator;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Iterator;
@@ -17,25 +15,34 @@ import prefuse.data.Graph;
 import prefuse.visual.VisualItem;
 import prefuse.Constants;
 import com.mallardsoft.tuple.Pair;
+import org.jdesktop.application.*;
+import org.jdesktop.application.Action;
 
 /**
  * Date: 13-Aug-2008 15:11:13
  */
-public class Main {
+public class Main extends SingleFrameApplication {
+
     private JTextField textField1;
     private SwissPfamSearcher searcher;
     private GraphTestPanel graphPanel;
+    private JButton button2;
+    private JButton button1;
 
-    Main() {
+    public static void main(String[] args) {
+        Application.launch(Main.class, args);
+    }
+
+    protected void startup() {
         try {
             searcher = new SwissPfamSearcher();
         } catch (Exception e) {
             System.out.printf("Exception instantiating SwissPfamSearcher:\n%s\n", e.getMessage());
         }
         graphPanel = new GraphTestPanel();
-    }
+        button2 = new JButton();
+        button1 = new JButton();
 
-    public void run() {
         System.out.printf("Starting dng...\n");
 
         // Main window
@@ -46,26 +53,31 @@ public class Main {
         // **** Input panel
         JPanel inputPanel = new JPanel(new GridBagLayout());
         ((GridBagLayout)inputPanel.getLayout()).columnWidths = new int[] {0, 0, 0};
-		((GridBagLayout)inputPanel.getLayout()).rowHeights = new int[] {0, 0};
-		((GridBagLayout)inputPanel.getLayout()).columnWeights = new double[] {1.0, 0.0, 1.0E-4};
-		((GridBagLayout)inputPanel.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
-        
+        ((GridBagLayout)inputPanel.getLayout()).rowHeights = new int[] {0, 0};
+        ((GridBagLayout)inputPanel.getLayout()).columnWeights = new double[] {1.0, 0.0, 1.0E-4};
+        ((GridBagLayout)inputPanel.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
+
         textField1 = new JTextField();
         textField1.setText("Q8GBW6");
         inputPanel.add(textField1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-			GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-			new Insets(0, 0, 0, 0), 0, 0));
+                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                new Insets(0, 0, 0, 0), 0, 0));
 
-        JButton button1 = new JButton();
+        //---- button2 ----
+        button2.setText("Stop");
+        button2.setAction(getAction("button2ActionPerformed"));
+        inputPanel.add(button2, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                new Insets(0, 0, 1, 1), 0, 0));
+
+
+        //---- button1 ----
+
         button1.setText("Search");
-        button1.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                button1ActionPerformed(e);
-            }
-        });
-        inputPanel.add(button1, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-				GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-				new Insets(0, 0, 1, 0), 0, 0));
+        button1.addActionListener(getAction("button1ActionPerformed"));
+        inputPanel.add(button1, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                new Insets(0, 0, 1, 0), 0, 0));
         // **** End input panel
 
         frame.getContentPane().add(inputPanel, BorderLayout.NORTH);
@@ -76,7 +88,13 @@ public class Main {
         frame.setVisible(true);
     }
 
-    private void button1ActionPerformed(ActionEvent e) {
+    @Action
+    public void button2ActionPerformed() {
+        graphPanel.getActionLayout().setDuration(1000);
+    }
+
+    @Action
+    public void button1ActionPerformed() {
         System.out.printf("You typed '%s'\n", textField1.getText());
         ArrayList<String> architectures = null;
         ArrayList<String> domains = null;
@@ -92,6 +110,7 @@ public class Main {
             for (String a:architectures) {
                 System.out.printf("%s\n", a);
             }
+            System.out.printf("%s architectures total.\n", architectures.size());
 
         } catch (Exception ex) {
             System.out.printf("Error searching with SwissPfamSearcher.\n");
@@ -124,8 +143,9 @@ public class Main {
         return architecture.toString();
     }
 
-    public static void main(String[] args) {
-        Main m = new Main();
-        m.run();
+    private javax.swing.Action getAction(String actionName) {
+        return getContext().getActionMap().get(actionName);
     }
+
+
 }

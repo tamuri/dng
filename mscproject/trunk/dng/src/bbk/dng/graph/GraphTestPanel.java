@@ -36,6 +36,11 @@ public class GraphTestPanel extends JPanel {
     public static final String EDGES = "graph.edges";
     public static final String AGGR = "aggregates";
 
+    public ActionList getActionLayout() {
+        return layout;
+    }
+
+    private ActionList layout;
     private Visualization m_vis;
 
     public GraphTestPanel() {
@@ -43,17 +48,6 @@ public class GraphTestPanel extends JPanel {
 
         // graph data
         Graph g = new Graph();
-        for ( int i=0; i<3; ++i ) {
-            Node n1 = g.addNode();
-            Node n2 = g.addNode();
-            Node n3 = g.addNode();
-            g.addEdge(n1, n2);
-            g.addEdge(n1, n3);
-            g.addEdge(n2, n3);
-        }
-        g.addEdge(0, 3);
-        g.addEdge(3, 6);
-        g.addEdge(6, 0);
 
         // new empty visualisation
         m_vis = new Visualization();
@@ -123,7 +117,7 @@ public class GraphTestPanel extends JPanel {
         
 
         // now create the main layout routine
-        ActionList layout = new ActionList(Activity.INFINITY);
+        layout = new ActionList(Activity.INFINITY);
         layout.add(colors);
         layout.add(fdl);
         //layout.add(new AggregateLayout(AGGR));
@@ -138,8 +132,10 @@ public class GraphTestPanel extends JPanel {
         display.setHighQuality(true);
         display.addControlListener(new ZoomControl());
         display.addControlListener(new PanControl());
-        display.addControlListener(new DragControl());
 
+        display.addControlListener(new DragControl());
+        display.addControlListener(new RotationControl(Control.MIDDLE_MOUSE_BUTTON));
+        display.addControlListener(new ToolTipControl("name"));
         display.addControlListener(
                 new ControlAdapter() {
                     public void itemClicked(VisualItem item, MouseEvent evt) {
