@@ -15,6 +15,7 @@ import prefuse.data.Graph;
 import prefuse.visual.VisualItem;
 import prefuse.Constants;
 import com.mallardsoft.tuple.Pair;
+import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 import org.jdesktop.application.*;
 import org.jdesktop.application.Action;
 
@@ -34,6 +35,12 @@ public class Main extends SingleFrameApplication {
     }
 
     protected void startup() {
+
+        try {
+              UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
+           } catch (Exception e) {}
+        
+
         try {
             searcher = new SwissPfamSearcher();
         } catch (Exception e) {
@@ -63,21 +70,24 @@ public class Main extends SingleFrameApplication {
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 new Insets(0, 0, 0, 0), 0, 0));
 
-        //---- button2 ----
-        button2.setText("Stop");
-        button2.setAction(getAction("button2ActionPerformed"));
-        inputPanel.add(button2, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                new Insets(0, 0, 1, 1), 0, 0));
 
 
         //---- button1 ----
 
+        button1.setAction(getAction("button1ActionPerformed"));
         button1.setText("Search");
-        button1.addActionListener(getAction("button1ActionPerformed"));
         inputPanel.add(button1, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 new Insets(0, 0, 1, 0), 0, 0));
+
+
+        //---- button2 ----
+        button2.setAction(getAction("button2ActionPerformed"));
+        button2.setText("Stop");
+        inputPanel.add(button2, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                new Insets(0, 0, 1, 1), 0, 0));
+
         // **** End input panel
 
         frame.getContentPane().add(inputPanel, BorderLayout.NORTH);

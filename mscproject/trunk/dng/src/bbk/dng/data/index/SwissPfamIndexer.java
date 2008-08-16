@@ -3,7 +3,6 @@ package bbk.dng.data.index;
 import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.KeywordAnalyzer;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.document.Document;
@@ -14,11 +13,11 @@ import java.util.*;
 /**
  * Date: 13-Aug-2008 12:18:16
  */
-public class SwissPfamIndexer extends AbstractSwissPfamParser {
+public class SwissPfamIndexer extends FileSwissPfamParser {
     public static final String INDEX_DIR = "/home/aut/Documents/Mental/Bioinformatics/project/dng/data_index/";
     private IndexWriter writer;
 
-    protected void actionAllDomains(Map<String, Map> allDomains) throws Exception {
+    public void actionAllDomains(Map<String, Map> allDomains) throws Exception {
         PerFieldAnalyzerWrapper analyzer = getDomainIndexAnalyzer();
         IndexWriter domainIndexWriter = new IndexWriter(INDEX_DIR + "domains", analyzer, true);
 
@@ -35,7 +34,7 @@ public class SwissPfamIndexer extends AbstractSwissPfamParser {
         domainIndexWriter.close();
     }
 
-    protected void actionPfamEntry(String proteinId, String proteinAccession, Map<Integer, String> domains) throws Exception {
+    public void actionPfamEntry(String proteinId, String proteinAccession, Map<Integer, String> domains) throws Exception {
         // Create architecture string
         List<Integer> sortedKeys = new ArrayList<Integer>(domains.keySet());
         Collections.sort(sortedKeys);

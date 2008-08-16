@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * Date: 13-Aug-2008 13:25:26
  */
-public class SwissPfamPrinter extends AbstractSwissPfamParser {
+public class SwissPfamPrinter extends FileSwissPfamParser {
     protected void actionAllDomains(Map<String, Map> allDomains) throws Exception {
         System.out.printf("Found %s domains\n", allDomains.size());
         for (String d: allDomains.keySet()) {

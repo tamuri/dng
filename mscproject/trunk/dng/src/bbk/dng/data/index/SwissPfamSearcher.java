@@ -1,11 +1,9 @@
 package bbk.dng.data.index;
 
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Hits;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.document.Document;
 
 import java.util.*;
 
