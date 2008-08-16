@@ -10,15 +10,16 @@ import java.util.*;
 /**
  * Date: 13-Aug-2008 10:39:46
  */
-public abstract class AbstractSwissPfamParser {
+public class SwissPfamFileIndexer {
     public static final String SWISSPFAM_FILEPATH = "/home/aut/Documents/Mental/Bioinformatics/project/data/Pfam/swisspfam";
     private int sequenceCount = 0;
+    private SwissPfamIndexer indexer;
 
-    AbstractSwissPfamParser() {
-
+    SwissPfamFileIndexer(SwissPfamIndexer indexer) {
+        this.indexer = indexer;
     }
 
-    public void parse(String filePath) throws Exception {
+    public void run(String filePath) throws Exception {
         System.out.printf("Parsing %s\n", filePath);
         
         // Set up regex patterns
@@ -49,7 +50,7 @@ public abstract class AbstractSwissPfamParser {
             if (startMatcher.find()) {
                 // if we already have a record, save it
                 if (proteinId != null) {
-                    actionPfamEntry(proteinId, proteinAccession, domains);
+                    this.indexer.actionPfamEntry(proteinId, proteinAccession, domains);
                 }
 
                 proteinId = startMatcher.group(1);
@@ -85,15 +86,11 @@ public abstract class AbstractSwissPfamParser {
         }
         
         // action the last entry of the file
-        actionPfamEntry(proteinId, proteinAccession, domains);
+        this.indexer.actionPfamEntry(proteinId, proteinAccession, domains);
 
         // action the complete list of domains
-        actionAllDomains(allDomains);
+        this.indexer.actionAllDomains(allDomains);
     }
-
-    protected abstract void actionAllDomains(Map<String, Map> allDomains) throws Exception;
-
-    protected abstract void actionPfamEntry(String proteinId, String proteinAccession, Map<Integer, String> domains) throws Exception;
 
     public int getSequenceCount() {
         return sequenceCount;
@@ -101,5 +98,22 @@ public abstract class AbstractSwissPfamParser {
 
     public void setSequenceCount(int sequenceCount) {
         this.sequenceCount = sequenceCount;
+    }
+
+    public static void main(String[] args) throws Exception {
+        long start = System.currentTimeMillis();
+        System.out.printf("Creating index at %s.\n", start);
+
+        SwissPfamIndexer indexer = new SwissPfamIndexer();
+        indexer.createIndex();
+
+        SwissPfamFileIndexer fileIndexer = new SwissPfamFileIndexer(indexer);
+
+        fileIndexer.run(SWISSPFAM_FILEPATH);
+
+        indexer.closeIndex();
+
+        long end = System.currentTimeMillis();
+        System.out.printf("Closing index at %s. Took %s\n", end, end - start);
     }
 }

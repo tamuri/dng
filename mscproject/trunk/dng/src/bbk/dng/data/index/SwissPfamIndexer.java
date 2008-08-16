@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * Date: 13-Aug-2008 12:18:16
  */
-public class SwissPfamIndexer extends FileSwissPfamParser {
+public class SwissPfamIndexer {
     public static final String INDEX_DIR = "/home/aut/Documents/Mental/Bioinformatics/project/dng/data_index/";
     private IndexWriter writer;
 
@@ -21,7 +21,7 @@ public class SwissPfamIndexer extends FileSwissPfamParser {
         PerFieldAnalyzerWrapper analyzer = getDomainIndexAnalyzer();
         IndexWriter domainIndexWriter = new IndexWriter(INDEX_DIR + "domains", analyzer, true);
 
-        for (String domain: allDomains.keySet()) {
+        for (String domain : allDomains.keySet()) {
             Document doc = new Document();
             doc.add(new Field("accession", domain, Field.Store.YES, Field.Index.UN_TOKENIZED));
             doc.add(new Field("id", (String) allDomains.get(domain).get("id"), Field.Store.YES, Field.Index.UN_TOKENIZED));
@@ -56,7 +56,7 @@ public class SwissPfamIndexer extends FileSwissPfamParser {
         System.out.printf("Saved %s (%s) with architecture %s\n", proteinId, proteinAccession, architecture);
     }
 
-    private void createIndex() throws Exception {
+    public void createIndex() throws Exception {
         PerFieldAnalyzerWrapper analyzer = getArchitectureIndexAnalyzer();
         writer = new IndexWriter(INDEX_DIR + "architectures", analyzer, true);
     }
@@ -77,18 +77,7 @@ public class SwissPfamIndexer extends FileSwissPfamParser {
         return analyzer;
     }
 
-    public static void main(String[] args) throws Exception {
-        SwissPfamIndexer indexer = new SwissPfamIndexer();
-        long start = System.currentTimeMillis();
-        System.out.printf("Creating index at %s.\n", start);
-        indexer.createIndex();
-        indexer.parse(SWISSPFAM_FILEPATH);
-        long end = System.currentTimeMillis();
-        System.out.printf("Closing index at %s. Took %s\n", end, end - start);
-        indexer.closeIndex();
-    }
-
-    private void closeIndex() throws Exception {
+    public void closeIndex() throws Exception {
         writer.optimize();
         writer.close();
     }
