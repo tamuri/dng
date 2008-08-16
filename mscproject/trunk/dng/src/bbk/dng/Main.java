@@ -106,7 +106,7 @@ public class Main extends SingleFrameApplication {
     @Action
     public void button1ActionPerformed() {
         System.out.printf("You typed '%s'\n", textField1.getText());
-        ArrayList<String> architectures = null;
+        Map<String, ArrayList<String>> architectures = null;
         ArrayList<String> domains = null;
         try {
             // find domains for this sequence
@@ -117,7 +117,8 @@ public class Main extends SingleFrameApplication {
 
             // find architectures with these domains
             architectures = searcher.getArchitecturesByDomains(domains);
-            for (String a:architectures) {
+
+            for (String a:architectures.keySet()) {
                 System.out.printf("%s\n", a);
             }
             System.out.printf("%s architectures total.\n", architectures.size());
@@ -129,7 +130,7 @@ public class Main extends SingleFrameApplication {
         if (architectures != null) {
 
             SimilarityCalculator calculator = new SimilarityCalculator();
-            Map<Pair<String,String>, Double> similarityMatrix = calculator.getArchitectureSimilarityMatrix(architectures);
+            Map<Pair<String,String>, Double> similarityMatrix = calculator.getArchitectureSimilarityMatrix(architectures.keySet());
 
             ArchitectureGraphBuilder graphBuilder = new ArchitectureGraphBuilder();
             Graph g = graphBuilder.initialiseGraph(architectures);

@@ -9,9 +9,14 @@ import java.util.*;
 
 /**
  * Date: 13-Aug-2008 10:39:46
+ *
+ * Parses original swisspfam file - used to index now replaced by PreparedFileIndexer
+ *
+ * TODO: don't index, only print - OBSOLETE
+ * 
  */
 public class SwissPfamFileIndexer {
-    public static final String SWISSPFAM_FILEPATH = "/home/aut/Documents/Mental/Bioinformatics/project/data/Pfam/swisspfam";
+    public static final String SWISSPFAM_FILEPATH = "/home/aut/Documents/Mental/Bioinformatics/project/data/lucene/swisspfam";
     private int sequenceCount = 0;
     private SwissPfamIndexer indexer;
 
@@ -37,7 +42,7 @@ public class SwissPfamFileIndexer {
         String proteinAccession = null;
 
         // Swisspfam file processing
-        Reader reader = new FileReader(SWISSPFAM_FILEPATH);
+        Reader reader = new FileReader(filePath);
         BufferedReader in = new BufferedReader(reader);
 
         // Read the first line in file
@@ -50,7 +55,7 @@ public class SwissPfamFileIndexer {
             if (startMatcher.find()) {
                 // if we already have a record, save it
                 if (proteinId != null) {
-                    this.indexer.actionPfamEntry(proteinId, proteinAccession, domains);
+                    this.indexer.savePfamEntry(null, null, null, null, null, null);
                 }
 
                 proteinId = startMatcher.group(1);
@@ -86,10 +91,10 @@ public class SwissPfamFileIndexer {
         }
         
         // action the last entry of the file
-        this.indexer.actionPfamEntry(proteinId, proteinAccession, domains);
+        this.indexer.savePfamEntry(null, null, null, null, null, null);
 
         // action the complete list of domains
-        this.indexer.actionAllDomains(allDomains);
+        this.indexer.saveAllDomains(allDomains);
     }
 
     public int getSequenceCount() {

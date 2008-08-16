@@ -16,8 +16,10 @@ import java.util.*;
 public class SwissPfamIndexer {
     public static final String INDEX_DIR = "/home/aut/Documents/Mental/Bioinformatics/project/dng/data_index/";
     private IndexWriter writer;
+    public static final String SEQUENCES_DIR = "sequences";
+    public static final String DOMAINS_DIR = "domains";
 
-    public void actionAllDomains(Map<String, Map> allDomains) throws Exception {
+    public void saveAllDomains(Map<String, Map> allDomains) throws Exception {
         PerFieldAnalyzerWrapper analyzer = getDomainIndexAnalyzer();
         IndexWriter domainIndexWriter = new IndexWriter(INDEX_DIR + "domains", analyzer, true);
 
@@ -34,38 +36,40 @@ public class SwissPfamIndexer {
         domainIndexWriter.close();
     }
 
-    public void actionPfamEntry(String proteinId, String proteinAccession, Map<Integer, String> domains) throws Exception {
-        // Create architecture string
-        List<Integer> sortedKeys = new ArrayList<Integer>(domains.keySet());
-        Collections.sort(sortedKeys);
-
-        Iterator<Integer> iter = sortedKeys.iterator();
-        StringBuffer architecture = new StringBuffer(domains.get(iter.next()));
-        // we're using whitespace analyser to store architectures - separate by space
-        while (iter.hasNext()) architecture.append(" ").append(domains.get(iter.next()));
+    public void savePfamEntry(String accession, String architecture, String entryName,
+                              String status, String proteinName, String organism) throws Exception {
 
         // Create Lucene document
         Document doc = new Document();
-        doc.add(new Field("id", proteinId, Field.Store.YES, Field.Index.UN_TOKENIZED));
-        doc.add(new Field("accession", proteinAccession, Field.Store.YES, Field.Index.UN_TOKENIZED));
-        doc.add(new Field("architecture", architecture.toString(), Field.Store.YES, Field.Index.TOKENIZED));
+        doc.add(new Field("accession", accession, Field.Store.YES, Field.Index.UN_TOKENIZED));
+        doc.add(new Field("architecture", architecture, Field.Store.YES, Field.Index.TOKENIZED));
+        doc.add(new Field("entry_name", entryName, Field.Store.YES, Field.Index.UN_TOKENIZED));
+        doc.add(new Field("status", status, Field.Store.YES, Field.Index.UN_TOKENIZED));
+        doc.add(new Field("protein_name", proteinName, Field.Store.YES, Field.Index.NO));
+        doc.add(new Field("organism", organism, Field.Store.YES, Field.Index.UN_TOKENIZED));
+
 
         // Add document to index
         writer.addDocument(doc);
 
-        System.out.printf("Saved %s (%s) with architecture %s\n", proteinId, proteinAccession, architecture);
+        System.out.printf("Saved %s (%s) with architecture %s\n", entryName, accession, architecture);
     }
 
     public void createIndex() throws Exception {
         PerFieldAnalyzerWrapper analyzer = getArchitectureIndexAnalyzer();
-        writer = new IndexWriter(INDEX_DIR + "architectures", analyzer, true);
+        writer = new IndexWriter(INDEX_DIR + "sequences", analyzer, true);
     }
 
     public PerFieldAnalyzerWrapper getArchitectureIndexAnalyzer() {
         PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(new StandardAnalyzer());
-        analyzer.addAnalyzer("id", new KeywordAnalyzer());
         analyzer.addAnalyzer("accession", new KeywordAnalyzer());
         analyzer.addAnalyzer("architecture", new WhitespaceAnalyzer());
+        analyzer.addAnalyzer("entry_name", new KeywordAnalyzer());
+        analyzer.addAnalyzer("status", new KeywordAnalyzer());
+        analyzer.addAnalyzer("status", new KeywordAnalyzer());
+        analyzer.addAnalyzer("protein_name", new StandardAnalyzer());
+        analyzer.addAnalyzer("organism", new KeywordAnalyzer());
+
         return analyzer;
     }
 

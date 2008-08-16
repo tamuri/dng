@@ -20,7 +20,7 @@ public class SimilarityCalculator {
 
     }
 
-    public Map<Pair<String,String>, Double> getArchitectureSimilarityMatrix(ArrayList<String> architectures) {
+    public Map<Pair<String,String>, Double> getArchitectureSimilarityMatrix(Set<String> architectures) {
         // Given an array list of distinct architectures, returns a Map (with key of two
         // architectures) of similarity scores
         Map<Pair<String,String>, Double> similarityMatrix = initialiseArchitectureSimilarityMatrix(architectures);
@@ -204,7 +204,7 @@ public class SimilarityCalculator {
         return domainSimilarities;
     }
 
-    private Map<Pair<String,String>, Double> initialiseArchitectureSimilarityMatrix(ArrayList<String> architectures) {
+    private Map<Pair<String,String>, Double> initialiseArchitectureSimilarityMatrix(Set<String> architectures) {
         System.out.printf("initialiseArchitectureSimilarityMatrix");
         Map<Pair<String,String>, Double> matrix = new HashMap<Pair<String,String>, Double>();
 

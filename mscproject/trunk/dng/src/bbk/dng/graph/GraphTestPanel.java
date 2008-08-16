@@ -139,7 +139,7 @@ public class GraphTestPanel extends JPanel {
         display.addControlListener(
                 new ControlAdapter() {
                     public void itemClicked(VisualItem item, MouseEvent evt) {
-                        System.out.printf("%s\n", item.getString("name"));
+                        System.out.printf("%s -> %s\n", item.getString("name"), item.getString("sequences"));
                     }
                 }
         );

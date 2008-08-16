@@ -17,15 +17,21 @@ public class ArchitectureGraphBuilder {
 
     }
 
-    public Graph initialiseGraph(ArrayList<String> architectures) {
+    public Graph initialiseGraph(Map<String, ArrayList<String>> architectures) {
         Graph g = new Graph();
         g.addColumn("name", String.class);
+        g.addColumn("sequences", String.class);
 
         Table t = g.getNodeTable();
 
-        for (String a: architectures) {
+        for (String a: architectures.keySet()) {
             int nodeId = t.addRow();
             t.setString(nodeId, "name", a);
+            StringBuffer sb = new StringBuffer();
+            for (String s: architectures.get(a)) {
+                sb.append(s).append(",");
+            }
+            t.setString(nodeId, "sequences", sb.toString());
         }
 
         return g;

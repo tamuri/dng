@@ -19,16 +19,15 @@ public class SwissPfamSearcher {
 
     public SwissPfamSearcher() throws Exception{
         SwissPfamIndexer sp = new SwissPfamIndexer();
-        indexPath = SwissPfamIndexer.INDEX_DIR;
 
-        architectureSearcher = new IndexSearcher(IndexReader.open(indexPath + "architectures"));
+        architectureSearcher = new IndexSearcher(IndexReader.open(SwissPfamIndexer.INDEX_DIR + SwissPfamIndexer.SEQUENCES_DIR));
         architectureParser = new QueryParser("id", sp.getArchitectureIndexAnalyzer());
 
-        domainSearcher = new IndexSearcher(IndexReader.open(indexPath + "domains"));
+        domainSearcher = new IndexSearcher(IndexReader.open(SwissPfamIndexer.INDEX_DIR + SwissPfamIndexer.DOMAINS_DIR));
         domainParser = new QueryParser("accession", sp.getDomainIndexAnalyzer());
     }
 
-    public ArrayList<String> getArchitecturesByDomains(ArrayList<String> domains) throws Exception {
+    public Map<String, ArrayList<String>> getArchitecturesByDomains(ArrayList<String> domains) throws Exception {
         StringBuffer q = new StringBuffer();
         for (String d: domains) {
             q.append(" architecture:").append(d);
@@ -40,14 +39,18 @@ public class SwissPfamSearcher {
             return null;
         }
 
-        Set<String> architectures = new HashSet<String>();
-        // hits actually contains all sequences with matching architectures
-        // get unique list of architectures
+        Map<String, ArrayList<String>> architectures = new HashMap<String, ArrayList<String>>();
         for (int i = 0; i < hits.length(); i++) {
-            architectures.add(hits.doc(i).get("architecture"));
+            if (architectures.containsKey(hits.doc(i).get("architecture"))) {
+                architectures.get(hits.doc(i).get("architecture")).add(hits.doc(i).get("entry_name"));
+            } else {
+                ArrayList<String> sequence = new ArrayList<String>();
+                sequence.add(hits.doc(i).get("entry_name"));
+                architectures.put(hits.doc(i).get("architecture"), sequence);
+            }
         }
 
-        return new ArrayList<String>(architectures);
+        return architectures;
     }
 
     public ArrayList<String> getDomainsBySequence(String sequenceAccession) throws Exception {
