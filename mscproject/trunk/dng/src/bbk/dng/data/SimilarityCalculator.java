@@ -20,6 +20,42 @@ public class SimilarityCalculator {
 
     }
 
+    public Map<String, Double> getSimilarityScoresForSingleArchitecture(String architecture, Set<String> architectures) {
+        Map<String, Double> similarityMatrix = new HashMap<String, Double>();
+
+        for (String arch: architectures) {
+            similarityMatrix.put(arch, getArchitectureSimilarity(architecture, arch));
+        }
+
+        return similarityMatrix;
+    }
+
+    public ArrayList<String> getMostSimilarArchitectures(Map<String, Double> matrix, int itemsToReturn) {
+       ArrayList<Map.Entry<String, Double>> myArrayList = new ArrayList<Map.Entry<String, Double>>(matrix.entrySet());
+
+       Collections.sort(myArrayList, new MyComparator());
+
+        Iterator itr=myArrayList.iterator();
+        String key="";
+        double value=0;
+        ArrayList<String> mostSimilar = new ArrayList<String>();
+        while(itr.hasNext()){
+            Map.Entry<String, Double> e = (Map.Entry<String, Double>)itr.next();
+
+            key = e.getKey();
+            value = e.getValue();
+
+            System.out.printf("%s = %s", key, value);
+
+            mostSimilar.add(e.getKey());
+            if (mostSimilar.size() >= itemsToReturn) {
+                break;
+            }
+        }
+
+        return mostSimilar;
+    }
+
     public Map<Pair<String,String>, Double> getArchitectureSimilarityMatrix(Set<String> architectures) {
         // Given an array list of distinct architectures, returns a Map (with key of two
         // architectures) of similarity scores
@@ -210,8 +246,10 @@ public class SimilarityCalculator {
 
         for (String archRow: architectures) {
             for (String archColumn: architectures) {
-                Pair<String,String> key = Tuple.from(archRow, archColumn);
-                matrix.put(key, 0.0);
+                if (!matrix.containsKey(Tuple.from(archColumn, archRow))) {
+                    Pair<String,String> key = Tuple.from(archRow, archColumn);
+                    matrix.put(key, 0.0);
+                }
             }
         }
 
@@ -238,3 +276,31 @@ public class SimilarityCalculator {
     }
 }
 
+class MyComparator implements Comparator{
+
+    public int compare(Object obj1, Object obj2){
+
+        int result=0;Map.Entry e1 = (Map.Entry)obj1 ;
+
+        Map.Entry e2 = (Map.Entry)obj2 ;//Sort based on values.
+
+        Double value1 = (Double)e1.getValue();
+        Double value2 = (Double)e2.getValue();
+
+        if(value1.compareTo(value2)==0){
+
+            String word1=(String)e1.getKey();
+            String word2=(String)e2.getKey();
+
+            //Sort String in an alphabetical order
+            result=word1.compareToIgnoreCase(word2);
+
+        } else{
+            //Sort values in a descending order
+            result=value2.compareTo( value1 );
+        }
+
+        return result;
+    }
+
+}

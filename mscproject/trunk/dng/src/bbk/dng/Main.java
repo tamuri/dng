@@ -14,6 +14,7 @@ import java.util.Iterator;
 import prefuse.data.Graph;
 import prefuse.visual.VisualItem;
 import prefuse.Constants;
+import prefuse.activity.Activity;
 import com.mallardsoft.tuple.Pair;
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 import org.jdesktop.application.*;
@@ -29,6 +30,7 @@ public class Main extends SingleFrameApplication {
     private GraphTestPanel graphPanel;
     private JButton button2;
     private JButton button1;
+    private String button2State = "running";
 
     public static void main(String[] args) {
         Application.launch(Main.class, args);
@@ -100,14 +102,25 @@ public class Main extends SingleFrameApplication {
 
     @Action
     public void button2ActionPerformed() {
-        graphPanel.getActionLayout().setDuration(1000);
+        if (button2State.equals("running")){
+            graphPanel.getActionLayout().setDuration(1000);
+            button2State = "stopped";
+        } else {
+            graphPanel.getActionLayout().setDuration(Activity.INFINITY);
+            graphPanel.getActionLayout().run();
+            button2State = "running";
+        }
+
     }
 
     @Action
-    public void button1ActionPerformed() {
+    public void button1ActionPerformed() throws Exception {
         System.out.printf("You typed '%s'\n", textField1.getText());
         Map<String, ArrayList<String>> architectures = null;
         ArrayList<String> domains = null;
+
+        SimilarityCalculator calculator = new SimilarityCalculator();
+
         try {
             // find domains for this sequence
             domains = searcher.getDomainsBySequence(textField1.getText());
@@ -123,17 +136,35 @@ public class Main extends SingleFrameApplication {
             }
             System.out.printf("%s architectures total.\n", architectures.size());
 
+            if (architectures.size() > 100) {
+                Map<String, Double> matrix = calculator.getSimilarityScoresForSingleArchitecture(joinDomainsForArchitecture(domains), architectures.keySet());
+                ArrayList<String> mostSimilarArchitectures = calculator.getMostSimilarArchitectures(matrix, 100);
+
+                ArrayList<String> toRemove = new ArrayList<String>();
+                for (String a: architectures.keySet()) {
+                    if (!mostSimilarArchitectures.contains(a)) {
+                        toRemove.add(a);
+                    }
+                }
+
+                for (String a: toRemove) {
+                    architectures.remove(a);
+                }
+
+            }
+            
         } catch (Exception ex) {
             System.out.printf("Error searching with SwissPfamSearcher.\n");
+            throw (ex);
         }
 
         if (architectures != null) {
 
-            SimilarityCalculator calculator = new SimilarityCalculator();
+
             Map<Pair<String,String>, Double> similarityMatrix = calculator.getArchitectureSimilarityMatrix(architectures.keySet());
 
             ArchitectureGraphBuilder graphBuilder = new ArchitectureGraphBuilder();
-            Graph g = graphBuilder.initialiseGraph(architectures);
+            Graph g = graphBuilder.initialiseGraph(architectures, joinDomainsForArchitecture(domains));
             graphBuilder.addEdgesByMatrix(g, similarityMatrix,  joinDomainsForArchitecture(domains));
 
             graphPanel.getVisualization().removeGroup("graph");

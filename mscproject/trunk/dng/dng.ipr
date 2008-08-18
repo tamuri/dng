@@ -4,7 +4,7 @@
     <defaultAnt bundledAnt="true" />
   </component>
   <component name="BuildJarProjectSettings">
-    <option name="BUILD_JARS_ON_MAKE" value="false" />
+    <option name="BUILD_JARS_ON_MAKE" value="true" />
   </component>
   <component name="CodeStyleProjectProfileManger">
     <option name="PROJECT_PROFILE" />
@@ -245,6 +245,25 @@
     <option name="GENERATE_IIOP_STUBS" value="false" />
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
   </component>
+  <component name="SvnBranchConfigurationManager">
+    <option name="myConfigurationMap">
+      <map>
+        <entry key="$PROJECT_DIR$">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="branchUrls">
+                <list>
+                  <option value="http://argon/svn/mscproject/branches" />
+                  <option value="http://argon/svn/mscproject/tags" />
+                </list>
+              </option>
+              <option name="trunkUrl" value="http://argon/svn/mscproject/trunk" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />
   </component>
@@ -259,6 +278,51 @@
       </JAVADOC>
       <SOURCES>
         <root url="file:///home/aut/Documents/Mental/Bioinformatics/project/java.libs/lucene/lucene-2.3.2/src/java" />
+      </SOURCES>
+    </library>
+    <library name="mysql">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/mysql-connector-java-5.1.6-bin.jar!/" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES>
+        <root url="file:///home/aut/Documents/Mental/Bioinformatics/project/java.libs/mysql/mysql-connector-java-5.1.6/src" />
+      </SOURCES>
+    </library>
+    <library name="prefuse">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/prefuse.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="file:///home/aut/Documents/Mental/Bioinformatics/project/prefuse/prefuse-beta/doc" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="file:///home/aut/Documents/Mental/Bioinformatics/project/prefuse/prefuse-beta/src" />
+      </SOURCES>
+    </library>
+    <library name="swingappframework">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/AppFramework-1.03.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/swing-worker.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="file:///home/aut/Documents/Mental/Bioinformatics/project/java.libs/swingappframework/AppFramework-1.03/javadoc" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="file:///home/aut/Documents/Mental/Bioinformatics/project/java.libs/swingappframework/AppFramework-1.03/src" />
+      </SOURCES>
+    </library>
+    <library name="jgoodies">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/lib/forms-1.2.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib/looks-2.2.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="file:///home/aut/Documents/Mental/Bioinformatics/project/java.libs/looks-2.2.0/docs/api" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="file:///home/aut/Documents/Mental/Bioinformatics/project/java.libs/looks-2.2.0/src/core" />
+        <root url="file:///home/aut/Documents/Mental/Bioinformatics/project/java.libs/looks-2.2.0/src/test" />
       </SOURCES>
     </library>
   </component>

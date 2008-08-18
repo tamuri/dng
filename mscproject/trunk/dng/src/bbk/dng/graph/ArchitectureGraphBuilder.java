@@ -17,10 +17,11 @@ public class ArchitectureGraphBuilder {
 
     }
 
-    public Graph initialiseGraph(Map<String, ArrayList<String>> architectures) {
+    public Graph initialiseGraph(Map<String, ArrayList<String>> architectures, String parentArchitecture) {
         Graph g = new Graph();
         g.addColumn("name", String.class);
         g.addColumn("sequences", String.class);
+        g.addColumn("parent", boolean.class);
 
         Table t = g.getNodeTable();
 
@@ -32,6 +33,11 @@ public class ArchitectureGraphBuilder {
                 sb.append(s).append(",");
             }
             t.setString(nodeId, "sequences", sb.toString());
+            if (a.equals(parentArchitecture)) {
+                t.setBoolean(nodeId, "parent", true);
+            } else {
+                t.setBoolean(nodeId, "parent", false);
+            }
         }
 
         return g;
@@ -80,6 +86,19 @@ public class ArchitectureGraphBuilder {
                             targetsToRemove.clear();
                             toConnect.add(Tuple.from(architectureNodeId.get(c), architectureNodeId.get(Tuple.get2(key))));
                             targetsToRemove.add(Tuple.get2(key));
+                        }
+                    } else if (Tuple.get2(key).equals(c) && !Tuple.get1(key).equals(c) && unconnected.contains(Tuple.get1(key))) {
+                        if (matrix.get(key) > maxscore) {
+                            maxscore = matrix.get(key);
+                            toConnect.clear();
+                            targetsToRemove.clear();
+                            toConnect.add(Tuple.from(architectureNodeId.get(c), architectureNodeId.get(Tuple.get1(key))));
+                            targetsToRemove.add(Tuple.get1(key));
+                        } else if (matrix.get(key) == maxscore && c.equals(parentArchitecture)) {
+                            toConnect.clear();
+                            targetsToRemove.clear();
+                            toConnect.add(Tuple.from(architectureNodeId.get(c), architectureNodeId.get(Tuple.get1(key))));
+                            targetsToRemove.add(Tuple.get1(key));
                         }
                     }
                 }

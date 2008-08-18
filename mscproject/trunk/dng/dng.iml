@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="true" type="JAVA_MODULE" version="4">
+  <component name="BuildJarSettings">
+    <containerInfo>
+      <containerElement type="module" name="dng">
+        <attribute name="method" value="6" />
+        <attribute name="URI" value="/dng.jar" />
+      </containerElement>
+      <containerElement type="library" name="lucene" level="project">
+        <attribute name="method" value="1" />
+        <attribute name="URI" value="/" />
+      </containerElement>
+      <containerElement type="library" name="mysql" level="project">
+        <attribute name="method" value="1" />
+        <attribute name="URI" value="/" />
+      </containerElement>
+    </containerInfo>
+    <setting name="jarUrl" value="file://$MODULE_DIR$/dng.jar" />
+    <setting name="buildJar" value="true" />
+    <setting name="mainClass" value="bbk.dng.data.Indexer" />
+  </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
@@ -9,6 +28,10 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="dng" level="project" />
     <orderEntry type="library" name="lucene" level="project" />
+    <orderEntry type="library" name="mysql" level="project" />
+    <orderEntry type="library" name="prefuse" level="project" />
+    <orderEntry type="library" name="swingappframework" level="project" />
+    <orderEntry type="library" name="jgoodies" level="project" />
     <orderEntryProperties />
   </component>
 </module>

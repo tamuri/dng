@@ -2,6 +2,8 @@ package bbk.dng.graph;
 
 import prefuse.data.Node;
 import prefuse.data.Graph;
+import prefuse.data.expression.Predicate;
+import prefuse.data.expression.parser.ExpressionParser;
 import prefuse.Visualization;
 import prefuse.Display;
 import prefuse.Constants;
@@ -14,10 +16,7 @@ import prefuse.action.layout.graph.ForceDirectedLayout;
 import prefuse.action.assignment.ColorAction;
 import prefuse.action.assignment.DataColorAction;
 import prefuse.activity.Activity;
-import prefuse.visual.VisualItem;
-import prefuse.visual.VisualGraph;
-import prefuse.visual.AggregateTable;
-import prefuse.visual.AggregateItem;
+import prefuse.visual.*;
 import prefuse.render.*;
 import prefuse.render.Renderer;
 
@@ -62,8 +61,15 @@ public class GraphTestPanel extends JPanel {
 //        tr.setRoundedCorner(8, 8);
 //        m_vis.setRendererFactory(new DefaultRendererFactory(tr));
 
-        Renderer nodeR = new ShapeRenderer(20);
-        m_vis.setRendererFactory(new DefaultRendererFactory(nodeR));
+        DefaultRendererFactory rf = new DefaultRendererFactory(new ShapeRenderer(30));
+
+
+        Predicate p0 = ExpressionParser.predicate("ISNODE() AND parent = true");
+        rf.add(p0, new CustomRenderer(40));
+       
+
+        m_vis.setRendererFactory(rf);
+
 
         // set up the visual operators
         // first set up all the color actions
@@ -101,20 +107,30 @@ public class GraphTestPanel extends JPanel {
 
         ForceSimulator fsim = new ForceSimulator(new RungeKuttaIntegrator());
 
-        float gravConstant = -1f;
+        /*float gravConstant = -1f;
         float minDistance = -1f;
         float theta = 0.9f;
 
         float drag = 0.004f;
         float springCoeff = 1E-5f;
         float defaultLength = 0f;  //default: 50f
+        */
+        float gravConstant = -1f;
+        float minDistance = 1000f;
+
+        float theta = 0.9f;
+
+        float drag = 0.004f;
+        float springCoeff = 1E-4f;
+        float defaultLength = 150f;  //default: 50f
+
 
         fsim.addForce(new NBodyForce(gravConstant, minDistance, theta));
         fsim.addForce(new DragForce(drag));
         fsim.addForce(new SpringForce(springCoeff, defaultLength));
 
-        ForceDirectedLayout fdl = new ForceDirectedLayout("graph", fsim, false);
-        
+        //ForceDirectedLayout fdl = new ForceDirectedLayout("graph", fsim, false);
+        ForceDirectedLayout fdl = new CustomizedForceDirectedLayout("graph", fsim, false);
 
         // now create the main layout routine
         layout = new ActionList(Activity.INFINITY);
@@ -155,4 +171,73 @@ public class GraphTestPanel extends JPanel {
         return m_vis;
     }
 
+}
+
+ class CustomizedForceDirectedLayout extends ForceDirectedLayout {
+
+	public CustomizedForceDirectedLayout(String group,
+		ForceSimulator fsim, boolean enforceBounds) {
+	    super(group, fsim, enforceBounds, false);
+	}
+
+	protected float getSpringLength(EdgeItem e) {
+	    /*NodeItem source = e.getSourceItem();
+	    NodeItem target =  e.getTargetItem();
+
+	    if (source.getInt("type") == target.getInt("type")) {
+		return 140;
+	    } else {
+		return 200;
+	    }*/
+        int i = 100 - Math.round(Float.parseFloat(e.getString("name")));
+        i = (i ^ 2) * 5;
+        //System.out.printf("%s = %s\n",e.getString("name"), i);
+        return i;
+    }
+
+	// two further possibilities to customize ....
+	protected float getMassValue(VisualItem n) {
+	    return 1.0f;
+	}
+
+	protected float getSpringCoefficient(EdgeItem e) {
+	    return -1;
+	}
+    }
+
+class CustomRenderer extends ShapeRenderer {
+
+    public CustomRenderer()
+    {
+        m_baseSize = 10;
+        super.setBaseSize(m_baseSize);
+    }
+
+    public CustomRenderer(int size)
+    {
+        m_baseSize = 10;
+        super.setBaseSize(size);
+        m_baseSize = size;
+    }
+
+    protected Shape getRawShape(VisualItem item)
+    {
+        //String sequences = item.getSourceTuple().getString("sequences");
+        double x = item.getX();
+        if(Double.isNaN(x) || Double.isInfinite(x))
+            x = 0.0D;
+        double y = item.getY();
+        if(Double.isNaN(y) || Double.isInfinite(y))
+            y = 0.0D;
+        double width = (double)m_baseSize * item.getSize();
+        if(width > 1.0D)
+        {
+            x -= width / 2D;
+            y -= width / 2D;
+        }
+
+        return rectangle(x, y, width, width);
+    }
+
+    private int m_baseSize;
 }
