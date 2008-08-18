@@ -20,13 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/bbk/dng/graph/ArchitectureGraphBuilder.java" afterPath="$PROJECT_DIR$/src/bbk/dng/graph/ArchitectureGraphBuilder.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dng.iml" afterPath="$PROJECT_DIR$/dng.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dng.ipr" afterPath="$PROJECT_DIR$/dng.ipr" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dng.iws" afterPath="$PROJECT_DIR$/dng.iws" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/bbk/dng/graph/GraphTestPanel.java" afterPath="$PROJECT_DIR$/src/bbk/dng/graph/GraphTestPanel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/bbk/dng/data/SimilarityCalculator.java" afterPath="$PROJECT_DIR$/src/bbk/dng/data/SimilarityCalculator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/bbk/dng/Main.java" afterPath="$PROJECT_DIR$/src/bbk/dng/Main.java" />
     </list>
     <ignored path="dng.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -92,7 +86,7 @@
       <file leaf-file-name="SimilarityCalculator.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/bbk/dng/data/SimilarityCalculator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="277" column="0" selection-start="10800" selection-end="10800" vertical-scroll-proportion="0.64208907">
+            <state line="277" column="0" selection-start="10800" selection-end="10800" vertical-scroll-proportion="0.41967872">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -103,7 +97,7 @@
       <file leaf-file-name="SwissPfamSearcher.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/bbk/dng/data/index/SwissPfamSearcher.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="29" column="41" selection-start="1036" selection-end="1036" vertical-scroll-proportion="0.32104453">
+            <state line="29" column="41" selection-start="1036" selection-end="1036" vertical-scroll-proportion="0.20983936">
               <folding />
             </state>
           </provider>
@@ -112,7 +106,7 @@
       <file leaf-file-name="ArchitectureGraphBuilder.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/bbk/dng/graph/ArchitectureGraphBuilder.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="38" column="52" selection-start="1211" selection-end="1211" vertical-scroll-proportion="0.8553459">
+            <state line="38" column="52" selection-start="1211" selection-end="1211" vertical-scroll-proportion="0.55453616">
               <folding />
             </state>
           </provider>
@@ -121,7 +115,7 @@
       <file leaf-file-name="Main.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/bbk/dng/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="155" column="32" selection-start="5333" selection-end="5333" vertical-scroll-proportion="0.6336478">
+            <state line="155" column="32" selection-start="5333" selection-end="5333" vertical-scroll-proportion="0.4108053">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -132,7 +126,7 @@
       <file leaf-file-name="GraphTestPanel.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/bbk/dng/graph/GraphTestPanel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="175" column="7" selection-start="5495" selection-end="5495" vertical-scroll-proportion="-0.038402457">
+            <state line="175" column="7" selection-start="5495" selection-end="5495" vertical-scroll-proportion="-0.025100403">
               <folding />
             </state>
           </provider>
@@ -623,7 +617,7 @@
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="8" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="3" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29892892" order="8" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32911393" order="8" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32911393" order="8" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" order="7" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" order="1" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" order="0" />
@@ -819,14 +813,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/bbk/dng/data/index/SwissPfamSearcher.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="41" selection-start="1036" selection-end="1036" vertical-scroll-proportion="0.32104453">
+        <state line="29" column="41" selection-start="1036" selection-end="1036" vertical-scroll-proportion="0.20983936">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/bbk/dng/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="155" column="32" selection-start="5333" selection-end="5333" vertical-scroll-proportion="0.6336478">
+        <state line="155" column="32" selection-start="5333" selection-end="5333" vertical-scroll-proportion="0.4108053">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -835,21 +829,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/bbk/dng/graph/ArchitectureGraphBuilder.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="38" column="52" selection-start="1211" selection-end="1211" vertical-scroll-proportion="0.8553459">
+        <state line="38" column="52" selection-start="1211" selection-end="1211" vertical-scroll-proportion="0.55453616">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/bbk/dng/graph/GraphTestPanel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="175" column="7" selection-start="5495" selection-end="5495" vertical-scroll-proportion="-0.038402457">
+        <state line="175" column="7" selection-start="5495" selection-end="5495" vertical-scroll-proportion="-0.025100403">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/bbk/dng/data/SimilarityCalculator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="277" column="0" selection-start="10800" selection-end="10800" vertical-scroll-proportion="0.64208907">
+        <state line="277" column="0" selection-start="10800" selection-end="10800" vertical-scroll-proportion="0.41967872">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
