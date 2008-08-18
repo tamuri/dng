@@ -22,8 +22,11 @@ import prefuse.render.Renderer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.event.MouseEvent;
 import java.util.Iterator;
+import java.util.Random;
 
 /**
  * Date: 13-Aug-2008 17:59:03
@@ -61,8 +64,8 @@ public class GraphTestPanel extends JPanel {
 //        tr.setRoundedCorner(8, 8);
 //        m_vis.setRendererFactory(new DefaultRendererFactory(tr));
 
-        DefaultRendererFactory rf = new DefaultRendererFactory(new ShapeRenderer(30));
-
+        //DefaultRendererFactory rf = new DefaultRendererFactory(new ShapeRenderer(30));
+DefaultRendererFactory rf = new DefaultRendererFactory(new CustomLabelRenderer());
 
         Predicate p0 = ExpressionParser.predicate("ISNODE() AND parent = true");
         rf.add(p0, new CustomRenderer(40));
@@ -240,4 +243,54 @@ class CustomRenderer extends ShapeRenderer {
     }
 
     private int m_baseSize;
+}
+
+class CustomLabelRenderer extends ShapeRenderer {
+    final static BasicStroke stroke = new BasicStroke(1.0f);
+    final static double recWidth = 6;
+    final static double pfamAHeight = 12;
+    final static double pfamBHeight = 6;
+    final static double gap = 3;
+    public CustomLabelRenderer() {
+
+    }
+
+   /* public void render(Graphics2D g, VisualItem item) {
+        Graphics2D myG = (Graphics2D) g;
+        myG.setPaint(Color.red);
+        double x = item.getX();
+        double y = item.getY();
+        myG.drawString("" + item.getSourceTuple().getString("sequences").split(",").length, (int)x, (int)y);
+    }*/
+
+
+    public void render(Graphics2D g, VisualItem item) {
+        g.setPaint(Color.blue);
+        int x = (int) item.getX();
+        int y = (int) item.getY();
+        item.setBounds(x, y, 15, 15);
+        BasicStroke stroke = new BasicStroke(1.0f);
+
+        String[] arches = item.getSourceTuple().getString("name").split("\\s");
+        int archCount = arches.length;
+
+        g.setPaint(Color.black);
+        g.draw(new Line2D.Double(x - 2, y, x + 2 + (recWidth * archCount) + (gap * (archCount - 1)), y));
+
+        for (int i=0; i<archCount; i++) {
+            if (arches[i].substring(0,2).equals("PF")) {
+                g.setPaint(Color.blue);
+                g.fill(new Rectangle2D.Double(x, y - pfamAHeight / 2, recWidth, pfamAHeight));
+                g.setPaint(Color.black);
+                g.draw(new Rectangle2D.Double(x, y - pfamAHeight / 2, recWidth, pfamAHeight));
+            } else {
+                g.setPaint(Color.green);
+                g.fill(new Rectangle2D.Double(x, y - pfamBHeight / 2, recWidth, pfamBHeight));
+                g.setPaint(Color.black);
+                g.draw(new Rectangle2D.Double(x, y - pfamBHeight / 2, recWidth, pfamBHeight));
+            }
+
+            x += recWidth + gap;
+        }
+    }
 }
