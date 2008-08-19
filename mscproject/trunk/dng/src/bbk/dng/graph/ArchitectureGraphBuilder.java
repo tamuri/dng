@@ -24,6 +24,8 @@ public class ArchitectureGraphBuilder {
         g.addColumn("parent", boolean.class);
 
         Table t = g.getNodeTable();
+        Table e = g.getEdgeTable();
+
 
         for (String a: architectures.keySet()) {
             int nodeId = t.addRow();
@@ -32,13 +34,20 @@ public class ArchitectureGraphBuilder {
             for (String s: architectures.get(a)) {
                 sb.append(s).append(",");
             }
-            t.setString(nodeId, "sequences", sb.toString());
+
             if (a.equals(parentArchitecture)) {
                 t.setBoolean(nodeId, "parent", true);
             } else {
                 t.setBoolean(nodeId, "parent", false);
             }
+
+            t.setString(nodeId, "sequences", sb.toString());
+
+            
+
         }
+
+
 
         return g;
     }

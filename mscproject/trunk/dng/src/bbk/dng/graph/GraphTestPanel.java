@@ -1,9 +1,6 @@
 package bbk.dng.graph;
 
-import prefuse.data.Node;
 import prefuse.data.Graph;
-import prefuse.data.expression.Predicate;
-import prefuse.data.expression.parser.ExpressionParser;
 import prefuse.Visualization;
 import prefuse.Display;
 import prefuse.Constants;
@@ -14,19 +11,15 @@ import prefuse.action.ActionList;
 import prefuse.action.RepaintAction;
 import prefuse.action.layout.graph.ForceDirectedLayout;
 import prefuse.action.assignment.ColorAction;
-import prefuse.action.assignment.DataColorAction;
 import prefuse.activity.Activity;
 import prefuse.visual.*;
 import prefuse.render.*;
-import prefuse.render.Renderer;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.event.MouseEvent;
-import java.util.Iterator;
-import java.util.Random;
 
 /**
  * Date: 13-Aug-2008 17:59:03
@@ -65,10 +58,10 @@ public class GraphTestPanel extends JPanel {
 //        m_vis.setRendererFactory(new DefaultRendererFactory(tr));
 
         //DefaultRendererFactory rf = new DefaultRendererFactory(new ShapeRenderer(30));
-DefaultRendererFactory rf = new DefaultRendererFactory(new CustomLabelRenderer());
+        DefaultRendererFactory rf = new DefaultRendererFactory(new ArchitectureImageRenderer());
 
-        Predicate p0 = ExpressionParser.predicate("ISNODE() AND parent = true");
-        rf.add(p0, new CustomRenderer(40));
+        //Predicate p0 = ExpressionParser.predicate("ISNODE() AND parent = true");
+        //rf.add(p0, new CustomRenderer(40));
        
 
         m_vis.setRendererFactory(rf);
@@ -92,6 +85,7 @@ DefaultRendererFactory rf = new DefaultRendererFactory(new CustomLabelRenderer()
         aStroke.add("_hover", ColorLib.rgb(255,100,100));
 
 
+        
 
         int[] palette = new int[] {
             ColorLib.rgba(255,200,200,150),
@@ -153,7 +147,7 @@ DefaultRendererFactory rf = new DefaultRendererFactory(new CustomLabelRenderer()
         display.addControlListener(new PanControl());
 
         display.addControlListener(new DragControl());
-        display.addControlListener(new RotationControl(Control.MIDDLE_MOUSE_BUTTON));
+        //display.addControlListener(new RotationControl(Control.MIDDLE_MOUSE_BUTTON));
         display.addControlListener(new ToolTipControl("name"));
         display.addControlListener(
                 new ControlAdapter() {
@@ -245,13 +239,13 @@ class CustomRenderer extends ShapeRenderer {
     private int m_baseSize;
 }
 
-class CustomLabelRenderer extends ShapeRenderer {
+class ArchitectureImageRenderer extends ShapeRenderer {
     final static BasicStroke stroke = new BasicStroke(1.0f);
-    final static double recWidth = 6;
-    final static double pfamAHeight = 12;
-    final static double pfamBHeight = 6;
-    final static double gap = 3;
-    public CustomLabelRenderer() {
+    final static double recWidth = 12;
+    final static double pfamAHeight = 24;
+    final static double pfamBHeight = 12;
+    final static double gap = 6;
+    public ArchitectureImageRenderer() {
 
     }
 
@@ -266,25 +260,44 @@ class CustomLabelRenderer extends ShapeRenderer {
 
     public void render(Graphics2D g, VisualItem item) {
         g.setPaint(Color.blue);
-        int x = (int) item.getX();
-        int y = (int) item.getY();
-        item.setBounds(x, y, 15, 15);
+
+
         BasicStroke stroke = new BasicStroke(1.0f);
 
         String[] arches = item.getSourceTuple().getString("name").split("\\s");
         int archCount = arches.length;
 
+        // draw box around architecture
         g.setPaint(Color.black);
-        g.draw(new Line2D.Double(x - 2, y, x + 2 + (recWidth * archCount) + (gap * (archCount - 1)), y));
+        double boxWidth = 8 + (recWidth * archCount) + (gap * (archCount - 1));
+
+        double x = item.getX() - boxWidth / 2;
+        double y = item.getY();
+        
+        item.setBounds(x - 4, y - pfamAHeight / 2 - 4, boxWidth, pfamAHeight + 8);
+
+        g.setPaint(Color.white);
+        g.fill(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
+                boxWidth, pfamAHeight + 8));
+        g.setPaint(Color.black);
+        g.draw(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
+                boxWidth, pfamAHeight + 8));
+
+
+        
+        g.draw(new Line2D.Double(x - 4, y, x + 4
+                + (recWidth * archCount) + (gap * (archCount - 1)), y));
+
+        int[] colors = ColorLib.getCategoryPalette(archCount);
 
         for (int i=0; i<archCount; i++) {
             if (arches[i].substring(0,2).equals("PF")) {
-                g.setPaint(Color.blue);
+                g.setPaint(new Color(colors[i]));
                 g.fill(new Rectangle2D.Double(x, y - pfamAHeight / 2, recWidth, pfamAHeight));
                 g.setPaint(Color.black);
                 g.draw(new Rectangle2D.Double(x, y - pfamAHeight / 2, recWidth, pfamAHeight));
             } else {
-                g.setPaint(Color.green);
+                g.setPaint(new Color(colors[i]));
                 g.fill(new Rectangle2D.Double(x, y - pfamBHeight / 2, recWidth, pfamBHeight));
                 g.setPaint(Color.black);
                 g.draw(new Rectangle2D.Double(x, y - pfamBHeight / 2, recWidth, pfamBHeight));
@@ -292,5 +305,7 @@ class CustomLabelRenderer extends ShapeRenderer {
 
             x += recWidth + gap;
         }
+
+
     }
 }
