@@ -39,40 +39,66 @@ public class Main extends SingleFrameApplication {
 
     protected void startup() {
 
-        try {
-              UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-           } catch (Exception e) {}
-        
+        System.out.printf("Starting dng...\n");
 
+        // Try to set the JGoodies look
+        try {
+            UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
+        } catch (Exception e) {}
+
+        // Application model components
         try {
             searcher = new SwissPfamSearcher();
         } catch (Exception e) {
             System.out.printf("Exception instantiating SwissPfamSearcher:\n%s\n", e.getMessage());
         }
-        graphPanel = new GraphTestPanel();
-        inputPanel = new InputPanel();
 
-        inputPanel.button1.setAction(getAction("button1ActionPerformed"));
-        inputPanel.button2.setAction(getAction("button2ActionPerformed"));
+        // Application GUI components
+        JFrame frame1 = new JFrame("DNG");
+        frame1.setSize(800,600);
+        frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        System.out.printf("Starting dng...\n");
+        {
+            Container frame1ContentPane = frame1.getContentPane();
+			frame1ContentPane.setLayout(new GridBagLayout());
+			((GridBagLayout)frame1ContentPane.getLayout()).columnWidths = new int[] {0, 0};
+			((GridBagLayout)frame1ContentPane.getLayout()).rowHeights = new int[] {0, 0};
+			((GridBagLayout)frame1ContentPane.getLayout()).columnWeights = new double[] {1.0, 1.0E-4};
+			((GridBagLayout)frame1ContentPane.getLayout()).rowWeights = new double[] {1.0, 1.0E-4};
 
-        // Main window
-        JFrame frame = new JFrame("DNG");
-        frame.setSize(800,600);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            JSplitPane splitPane1 = new JSplitPane();
+            splitPane1.setOneTouchExpandable(true);
 
-        frame.getContentPane().add(inputPanel, BorderLayout.NORTH);
-        frame.getContentPane().add(graphPanel, BorderLayout.CENTER);
+            frame1ContentPane.add(splitPane1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+				GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+				new Insets(0, 0, 0, 0), 0, 0));
+
+            graphPanel = new GraphTestPanel();
+            inputPanel = new InputPanel();
+
+            inputPanel.button1.setAction(getAction("button1ActionPerformed"));
+            inputPanel.button2.setAction(getAction("button2ActionPerformed"));
+
+
+            splitPane1.setLeftComponent(inputPanel);
+            splitPane1.setRightComponent(graphPanel);
+
+            frame1ContentPane.add(splitPane1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                    new Insets(0, 0, 0, 0), 0, 0));
+
+        }
 
         // Pack and display window
-        frame.pack();
-        frame.setVisible(true);
+        frame1.pack();
+        frame1.setLocationRelativeTo(frame1.getOwner());
+        frame1.setSize(1024, 700);
+        frame1.setVisible(true);
 
         try {
             button1ActionPerformed();
         } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
     }
@@ -165,6 +191,4 @@ public class Main extends SingleFrameApplication {
     private javax.swing.Action getAction(String actionName) {
         return getContext().getActionMap().get(actionName);
     }
-
-
 }

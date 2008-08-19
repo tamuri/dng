@@ -34,14 +34,12 @@ public class InputPanel extends JPanel {
                 new Insets(0, 0, 0, 0), 0, 0));
 
         button1 = new JButton();
-        //button1.setAction(getAction("button1ActionPerformed"));
 
         add(button1, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                         new Insets(0, 0, 1, 0), 0, 0));
 
         button2 = new JButton();
-        //button2.setAction(getAction("button2ActionPerformed"));
         add(button2, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 new Insets(0, 0, 1, 1), 0, 0));
