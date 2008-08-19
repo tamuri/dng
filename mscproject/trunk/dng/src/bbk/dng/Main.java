@@ -4,9 +4,12 @@ import bbk.dng.graph.GraphTestPanel;
 import bbk.dng.graph.ArchitectureGraphBuilder;
 import bbk.dng.data.index.SwissPfamSearcher;
 import bbk.dng.data.SimilarityCalculator;
+import bbk.dng.ui.panels.InputPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Iterator;
@@ -25,11 +28,9 @@ import org.jdesktop.application.Action;
  */
 public class Main extends SingleFrameApplication {
 
-    private JTextField textField1;
     private SwissPfamSearcher searcher;
     private GraphTestPanel graphPanel;
-    private JButton button2;
-    private JButton button1;
+    private InputPanel inputPanel;
     private String button2State = "running";
 
     public static void main(String[] args) {
@@ -49,8 +50,10 @@ public class Main extends SingleFrameApplication {
             System.out.printf("Exception instantiating SwissPfamSearcher:\n%s\n", e.getMessage());
         }
         graphPanel = new GraphTestPanel();
-        button2 = new JButton();
-        button1 = new JButton();
+        inputPanel = new InputPanel();
+
+        inputPanel.button1.setAction(getAction("button1ActionPerformed"));
+        inputPanel.button2.setAction(getAction("button2ActionPerformed"));
 
         System.out.printf("Starting dng...\n");
 
@@ -58,39 +61,6 @@ public class Main extends SingleFrameApplication {
         JFrame frame = new JFrame("DNG");
         frame.setSize(800,600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // **** Input panel
-        JPanel inputPanel = new JPanel(new GridBagLayout());
-        ((GridBagLayout)inputPanel.getLayout()).columnWidths = new int[] {0, 0, 0};
-        ((GridBagLayout)inputPanel.getLayout()).rowHeights = new int[] {0, 0};
-        ((GridBagLayout)inputPanel.getLayout()).columnWeights = new double[] {1.0, 0.0, 1.0E-4};
-        ((GridBagLayout)inputPanel.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
-
-        textField1 = new JTextField();
-        textField1.setText("A0EJ90"); //Q8GBW6
-        inputPanel.add(textField1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                new Insets(0, 0, 0, 0), 0, 0));
-
-
-
-        //---- button1 ----
-
-        button1.setAction(getAction("button1ActionPerformed"));
-        button1.setText("Search");
-        inputPanel.add(button1, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                new Insets(0, 0, 1, 0), 0, 0));
-
-
-        //---- button2 ----
-        button2.setAction(getAction("button2ActionPerformed"));
-        button2.setText("Stop");
-        inputPanel.add(button2, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                new Insets(0, 0, 1, 1), 0, 0));
-
-        // **** End input panel
 
         frame.getContentPane().add(inputPanel, BorderLayout.NORTH);
         frame.getContentPane().add(graphPanel, BorderLayout.CENTER);
@@ -100,10 +70,11 @@ public class Main extends SingleFrameApplication {
         frame.setVisible(true);
 
         try {
-            this.button1ActionPerformed();
+            button1ActionPerformed();
         } catch (Exception e) {
-            System.out.printf("%s\n", e.getMessage());
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
+
     }
 
     @Action
@@ -121,7 +92,7 @@ public class Main extends SingleFrameApplication {
 
     @Action
     public void button1ActionPerformed() throws Exception {
-        System.out.printf("You typed '%s'\n", textField1.getText());
+        System.out.printf("You typed '%s'\n", inputPanel.textField1.getText());
         Map<String, ArrayList<String>> architectures = null;
         ArrayList<String> domains = null;
 
@@ -129,7 +100,7 @@ public class Main extends SingleFrameApplication {
 
         try {
             // find domains for this sequence
-            domains = searcher.getDomainsBySequence(textField1.getText());
+            domains = searcher.getDomainsBySequence(inputPanel.textField1.getText());
             for (String d: domains) {
                 System.out.printf("%s\n", d);
             }

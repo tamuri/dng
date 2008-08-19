@@ -244,14 +244,6 @@ class ArchitectureImageRenderer extends ShapeRenderer {
     public ArchitectureImageRenderer() {
     }
 
-   /* public void render(Graphics2D g, VisualItem item) {
-        Graphics2D myG = (Graphics2D) g;
-        myG.setPaint(Color.red);
-        double x = item.getX();
-        double y = item.getY();
-        myG.drawString("" + item.getSourceTuple().getString("sequences").split(",").length, (int)x, (int)y);
-    }*/
-
     protected Shape getRawShape(VisualItem item) {
         String[] arches = item.getSourceTuple().getString("name").split("\\s");
         int archCount = arches.length;
@@ -261,19 +253,6 @@ class ArchitectureImageRenderer extends ShapeRenderer {
 
         return new Rectangle((int)x - 4, (int)(y - pfamAHeight / 2 - 4),
                 (int)boxWidth, (int)pfamAHeight + 8);
-
-        /*g.setPaint(Color.white);
-        g.fill(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
-                boxWidth, pfamAHeight + 8));
-
-        if (item.getSourceTuple().getBoolean("parent")) {
-            g.setPaint(Color.red);
-        } else {
-            g.setPaint(Color.black);
-        }
-
-        g.draw(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
-                boxWidth, pfamAHeight + 8));*/
     }
 
     public void render(Graphics2D g, VisualItem item) {
