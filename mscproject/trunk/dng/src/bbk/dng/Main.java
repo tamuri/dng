@@ -8,8 +8,6 @@ import bbk.dng.ui.panels.InputPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Iterator;
@@ -44,7 +42,9 @@ public class Main extends SingleFrameApplication {
         // Try to set the JGoodies look
         try {
             UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.printf("ERROR: Could not set Plastic L&F.\n");
+        }
 
         // Application model components
         try {
@@ -119,8 +119,8 @@ public class Main extends SingleFrameApplication {
     @Action
     public void button1ActionPerformed() throws Exception {
         System.out.printf("You typed '%s'\n", inputPanel.textField1.getText());
-        Map<String, ArrayList<String>> architectures = null;
-        ArrayList<String> domains = null;
+        Map<String, ArrayList<String>> architectures;
+        ArrayList<String> domains;
 
         SimilarityCalculator calculator = new SimilarityCalculator();
 
@@ -161,19 +161,15 @@ public class Main extends SingleFrameApplication {
             throw (ex);
         }
 
-        if (architectures != null) {
+        Map<Pair<String,String>, Double> similarityMatrix = calculator.getArchitectureSimilarityMatrix(architectures.keySet());
 
+        ArchitectureGraphBuilder graphBuilder = new ArchitectureGraphBuilder();
+        Graph g = graphBuilder.initialiseGraph(architectures, joinDomainsForArchitecture(domains));
+        graphBuilder.addEdgesByMatrix(g, similarityMatrix,  joinDomainsForArchitecture(domains));
 
-            Map<Pair<String,String>, Double> similarityMatrix = calculator.getArchitectureSimilarityMatrix(architectures.keySet());
-
-            ArchitectureGraphBuilder graphBuilder = new ArchitectureGraphBuilder();
-            Graph g = graphBuilder.initialiseGraph(architectures, joinDomainsForArchitecture(domains));
-            graphBuilder.addEdgesByMatrix(g, similarityMatrix,  joinDomainsForArchitecture(domains));
-
-            graphPanel.getVisualization().removeGroup("graph");
-            graphPanel.getVisualization().addGraph("graph", g);
-            graphPanel.getVisualization().setValue("graph.nodes", null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
-        }
+        graphPanel.getVisualization().removeGroup("graph");
+        graphPanel.getVisualization().addGraph("graph", g);
+        graphPanel.getVisualization().setValue("graph.nodes", null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
 
         // graphPanel.getVisualization().repaint();
         graphPanel.getVisualization().run("layout");
