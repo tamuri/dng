@@ -6,7 +6,6 @@ import prefuse.Display;
 import prefuse.Constants;
 import prefuse.controls.*;
 import prefuse.util.ColorLib;
-import prefuse.util.GraphicsLib;
 import prefuse.util.force.*;
 import prefuse.action.ActionList;
 import prefuse.action.RepaintAction;
@@ -21,8 +20,6 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.event.MouseEvent;
-import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Date: 13-Aug-2008 17:59:03
@@ -51,7 +48,6 @@ public class GraphTestPanel extends JPanel {
         m_vis = new Visualization();
 
         // add visual data groups
-        VisualGraph vg = m_vis.addGraph(GRAPH, g);
         m_vis.setInteractive(EDGES, null, false);
         m_vis.setValue(NODES, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
 
@@ -90,11 +86,6 @@ public class GraphTestPanel extends JPanel {
 
         
 
-        int[] palette = new int[] {
-            ColorLib.rgba(255,200,200,150),
-            ColorLib.rgba(200,255,200,150),
-            ColorLib.rgba(200,200,255,150)
-        };
 
 
         // bundle the color actions
@@ -116,8 +107,8 @@ public class GraphTestPanel extends JPanel {
         float defaultLength = 0f;  //default: 50f
         */
         float gravConstant = -1f;
-        float minDistance = 1000f;
-
+        //float minDistance = 1000f;
+        float minDistance = -1f;
         float theta = 0.9f;
 
         float drag = 0.004f;
@@ -190,7 +181,7 @@ public class GraphTestPanel extends JPanel {
 		return 200;
 	    }*/
         int i = 100 - Math.round(Float.parseFloat(e.getString("name")));
-        i = (i ^ 2) * 5;
+        i = (i ^ 2) * 10;
         //System.out.printf("%s = %s\n",e.getString("name"), i);
         return i;
     }
@@ -250,10 +241,7 @@ class ArchitectureImageRenderer extends ShapeRenderer {
     final static double pfamBHeight = 12;
     final static double gap = 6;
 
-    private Map<String, Graphics2D> architectureImages;
-
     public ArchitectureImageRenderer() {
-        architectureImages = new HashMap<String, Graphics2D>();
     }
 
    /* public void render(Graphics2D g, VisualItem item) {
@@ -271,9 +259,8 @@ class ArchitectureImageRenderer extends ShapeRenderer {
         double x = item.getX() - boxWidth / 2;
         double y = item.getY();
 
-        Rectangle rr = new Rectangle((int)x - 4, (int)(y - pfamAHeight / 2 - 4),
+        return new Rectangle((int)x - 4, (int)(y - pfamAHeight / 2 - 4),
                 (int)boxWidth, (int)pfamAHeight + 8);
-        return rr;
 
         /*g.setPaint(Color.white);
         g.fill(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
@@ -304,23 +291,27 @@ class ArchitectureImageRenderer extends ShapeRenderer {
 
         item.setBounds(x - 4, y - pfamAHeight / 2 - 4, boxWidth, pfamAHeight + 8);
 
-        g.setPaint(Color.white);
-        g.fill(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
-                boxWidth, pfamAHeight + 8));
+
 
         if (item.getSourceTuple().getBoolean("parent")) {
-            g.setPaint(Color.red);
+            g.setPaint(Color.gray);
+            g.fill(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
+                boxWidth, pfamAHeight + 8));
+            //g.setPaint(Color.red);
             g.setStroke(strokeThick);
         } else {
-            g.setPaint(Color.black);
+            g.setPaint(Color.white);
+            g.fill(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
+                boxWidth, pfamAHeight + 8));
+
         }
 
-
+        g.setPaint(Color.black);
         g.draw(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
                 boxWidth, pfamAHeight + 8));
         g.setStroke(strokeThin);
 
-
+        //g.setPaint(Color.black);
         g.draw(new Line2D.Double(x - 4, y, x + 4
                 + (recWidth * archCount) + (gap * (archCount - 1)), y));
 
