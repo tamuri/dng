@@ -67,7 +67,7 @@ public class Main extends SingleFrameApplication {
         ((GridBagLayout)inputPanel.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
 
         textField1 = new JTextField();
-        textField1.setText("Q8GBW6");
+        textField1.setText("A0EJ90"); //Q8GBW6
         inputPanel.add(textField1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                 new Insets(0, 0, 0, 0), 0, 0));
@@ -98,6 +98,12 @@ public class Main extends SingleFrameApplication {
         // Pack and display window
         frame.pack();
         frame.setVisible(true);
+
+        try {
+            this.button1ActionPerformed();
+        } catch (Exception e) {
+            System.out.printf("%s\n", e.getMessage());
+        }
     }
 
     @Action

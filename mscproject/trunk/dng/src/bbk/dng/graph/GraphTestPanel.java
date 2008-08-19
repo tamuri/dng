@@ -6,6 +6,7 @@ import prefuse.Display;
 import prefuse.Constants;
 import prefuse.controls.*;
 import prefuse.util.ColorLib;
+import prefuse.util.GraphicsLib;
 import prefuse.util.force.*;
 import prefuse.action.ActionList;
 import prefuse.action.RepaintAction;
@@ -20,6 +21,8 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.event.MouseEvent;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Date: 13-Aug-2008 17:59:03
@@ -240,13 +243,17 @@ class CustomRenderer extends ShapeRenderer {
 }
 
 class ArchitectureImageRenderer extends ShapeRenderer {
-    final static BasicStroke stroke = new BasicStroke(1.0f);
+    final static BasicStroke strokeThin = new BasicStroke (1.0F);
+    final static BasicStroke strokeThick = new BasicStroke (2.0F);
     final static double recWidth = 12;
     final static double pfamAHeight = 24;
     final static double pfamBHeight = 12;
     final static double gap = 6;
-    public ArchitectureImageRenderer() {
 
+    private Map<String, Graphics2D> architectureImages;
+
+    public ArchitectureImageRenderer() {
+        architectureImages = new HashMap<String, Graphics2D>();
     }
 
    /* public void render(Graphics2D g, VisualItem item) {
@@ -257,13 +264,34 @@ class ArchitectureImageRenderer extends ShapeRenderer {
         myG.drawString("" + item.getSourceTuple().getString("sequences").split(",").length, (int)x, (int)y);
     }*/
 
+    protected Shape getRawShape(VisualItem item) {
+        String[] arches = item.getSourceTuple().getString("name").split("\\s");
+        int archCount = arches.length;
+        double boxWidth = 8 + (recWidth * archCount) + (gap * (archCount - 1));
+        double x = item.getX() - boxWidth / 2;
+        double y = item.getY();
+
+        Rectangle rr = new Rectangle((int)x - 4, (int)(y - pfamAHeight / 2 - 4),
+                (int)boxWidth, (int)pfamAHeight + 8);
+        return rr;
+
+        /*g.setPaint(Color.white);
+        g.fill(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
+                boxWidth, pfamAHeight + 8));
+
+        if (item.getSourceTuple().getBoolean("parent")) {
+            g.setPaint(Color.red);
+        } else {
+            g.setPaint(Color.black);
+        }
+
+        g.draw(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
+                boxWidth, pfamAHeight + 8));*/
+    }
 
     public void render(Graphics2D g, VisualItem item) {
-        g.setPaint(Color.blue);
 
-
-        BasicStroke stroke = new BasicStroke(1.0f);
-
+        
         String[] arches = item.getSourceTuple().getString("name").split("\\s");
         int archCount = arches.length;
 
@@ -273,18 +301,26 @@ class ArchitectureImageRenderer extends ShapeRenderer {
 
         double x = item.getX() - boxWidth / 2;
         double y = item.getY();
-        
+
         item.setBounds(x - 4, y - pfamAHeight / 2 - 4, boxWidth, pfamAHeight + 8);
 
         g.setPaint(Color.white);
         g.fill(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
                 boxWidth, pfamAHeight + 8));
-        g.setPaint(Color.black);
+
+        if (item.getSourceTuple().getBoolean("parent")) {
+            g.setPaint(Color.red);
+            g.setStroke(strokeThick);
+        } else {
+            g.setPaint(Color.black);
+        }
+
+
         g.draw(new Rectangle2D.Double(x - 4, y - pfamAHeight / 2 - 4,
                 boxWidth, pfamAHeight + 8));
+        g.setStroke(strokeThin);
 
 
-        
         g.draw(new Line2D.Double(x - 4, y, x + 4
                 + (recWidth * archCount) + (gap * (archCount - 1)), y));
 
