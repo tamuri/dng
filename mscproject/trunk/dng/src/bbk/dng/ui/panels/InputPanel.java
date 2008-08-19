@@ -1,13 +1,7 @@
 package bbk.dng.ui.panels;
 
-import org.jdesktop.application.*;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-import prefuse.activity.Activity;
 
 /**
  * Date: 19-Aug-2008 14:38:38
