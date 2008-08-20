@@ -73,4 +73,61 @@ public class SwissPfamSearcher {
 
         return domains;
     }
+
+    public Map<String, String> getSequenceByEntryName(String sequenceIdentifier) {
+
+        String searchField;
+        Hits hits;
+        Map<String, String> sequence = null;
+
+        if (sequenceIdentifier.indexOf("_") > -1) {
+            searchField = "entry_name";
+        } else {
+            searchField = "accession";
+        }
+
+
+        try {
+            hits = architectureSearcher.search(architectureParser.parse(searchField + ":" + sequenceIdentifier));
+        } catch (Exception e) {
+            System.out.printf("Error searching for \"entry_name:\"" + sequenceIdentifier);
+            return null;
+        }
+
+        if (hits == null) {
+            return null;
+        } else if (hits.length() == 1) {
+            sequence = new HashMap<String, String>();
+            try {
+                sequence.put("architecture", hits.doc(0).get("architecture"));
+                sequence.put("accession", hits.doc(0).get("accession"));
+                sequence.put("entry_name", hits.doc(0).get("entry_name"));
+                sequence.put("organism", hits.doc(0).get("organism"));
+                sequence.put("protein_name", hits.doc(0).get("protein_name"));
+                sequence.put("status", hits.doc(0).get("status"));
+            } catch (Exception e) {
+                System.out.printf("Error populating sequence from Hit record.");
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        return sequence;
+    }
+
+    public Set<String> getOrganismsByDomains(ArrayList<String> domains) throws Exception{
+        Set<String> organisms = new HashSet<String>();
+
+        StringBuffer q = new StringBuffer();
+        for (String d: domains) {
+            q.append(" architecture:").append(d);
+        }
+        Hits hits = architectureSearcher.search(architectureParser.parse(q.toString()));
+
+        for (int i = 0; i < hits.length(); i++) {
+            organisms.add(hits.doc(i).get("organism"));
+        }
+
+        return organisms;
+    }
 }
