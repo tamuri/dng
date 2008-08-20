@@ -1,6 +1,6 @@
 package bbk.dng;
 
-import bbk.dng.graph.GraphTestPanel;
+import bbk.dng.graph.GraphPanel;
 import bbk.dng.graph.ArchitectureGraphBuilder;
 import bbk.dng.data.index.SwissPfamSearcher;
 import bbk.dng.data.SimilarityCalculator;
@@ -11,13 +11,10 @@ import bbk.dng.utils.NameValue;
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
 
 import prefuse.data.Graph;
 import prefuse.visual.VisualItem;
 import prefuse.Constants;
-import prefuse.render.DefaultRendererFactory;
 import prefuse.util.ColorLib;
 import prefuse.activity.Activity;
 import com.mallardsoft.tuple.Pair;
@@ -31,7 +28,7 @@ import org.jdesktop.application.Action;
 public class Main extends SingleFrameApplication {
 
     private SwissPfamSearcher searcher;
-    private GraphTestPanel graphPanel;
+    private GraphPanel graphPanel;
     private SequenceSearchBoxPanel inputPanel;
     private String button2State = "running";
     private JButton graphStopRenderingButton;
@@ -78,7 +75,7 @@ public class Main extends SingleFrameApplication {
 
             // Search tab panel
             inputPanel = new SequenceSearchBoxPanel();
-            //inputPanel.button1.setAction(getAction("button1ActionPerformed"));
+            //inputPanel.button1.setAction(getAction("drawGraphAction"));
             inputPanel.button1.setAction(getAction("sequenceSubmitted"));
 
             JPanel panel2 = new JPanel();
@@ -94,7 +91,7 @@ public class Main extends SingleFrameApplication {
 
             graphCriteriaPanel = new GraphCriteriaPanel();
             graphCriteriaPanel.button1.setEnabled(false);
-            graphCriteriaPanel.button1.setAction(getAction("button1ActionPerformed"));
+            graphCriteriaPanel.button1.setAction(getAction("drawGraphAction"));
 
             panel2.add(graphCriteriaPanel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
 				GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -110,10 +107,10 @@ public class Main extends SingleFrameApplication {
             graphStopRenderingButton = new JButton();
             graphTab.add(graphStopRenderingButton, BorderLayout.CENTER);
             tabbedPane1.addTab("Graph", graphTab);
-            graphStopRenderingButton.setAction(getAction("button2ActionPerformed"));
+            graphStopRenderingButton.setAction(getAction("toggleGraphRenderingAction"));
 
             // Main network graph drawing area
-            graphPanel = new GraphTestPanel();
+            graphPanel = new GraphPanel();
 
             // Split pane for main frame
             JSplitPane splitPane1 = new JSplitPane();
@@ -140,7 +137,7 @@ public class Main extends SingleFrameApplication {
         frame1.setVisible(true);
 
         try {
-            button1ActionPerformed();
+            drawGraphAction();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -148,7 +145,7 @@ public class Main extends SingleFrameApplication {
     }
 
     @Action
-    public void button2ActionPerformed() {
+    public void toggleGraphRenderingAction() {
         if (button2State.equals("running")){
             graphPanel.getActionLayout().setDuration(1000);
             graphStopRenderingButton.setText("Run");
@@ -163,7 +160,7 @@ public class Main extends SingleFrameApplication {
     }
 
     @Action
-    public void button1ActionPerformed() throws Exception {
+    public void drawGraphAction() throws Exception {
         String sequenceIdentifier = inputPanel.textField1.getText();
         String pfamDomainOperator = getSelection(graphCriteriaPanel.radioButtonGroup).getText().trim();
         ArrayList<String> pfamDomainsSelected = new ArrayList<String>();
@@ -173,7 +170,7 @@ public class Main extends SingleFrameApplication {
         }
 
         String organism = ((NameValue) graphCriteriaPanel.comboBox1.getSelectedItem()).getValue();
-        String sequenceSelectionOperator = graphCriteriaPanel.comboBox2.getSelectedItem().toString();
+        // String sequenceSelectionOperator = graphCriteriaPanel.comboBox2.getSelectedItem().toString();
 
         Map<String, ArrayList<String>> architectures;
         ArrayList<String> domains;
@@ -228,9 +225,9 @@ public class Main extends SingleFrameApplication {
         // all distinct domains
         Set<String> d = new HashSet<String>();
         for (String a: architectures.keySet()) {
-            for (String thisDomain: a.split("\\s"))
-                d.add(thisDomain);
+            Collections.addAll(d, a.split("\\s"));
         }
+
 
         int[] colors = ColorLib.getCategoryPalette(d.size());
         int thisColour = 0;
