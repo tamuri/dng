@@ -20,6 +20,7 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.event.MouseEvent;
+import java.util.HashMap;
 
 /**
  * Date: 13-Aug-2008 17:59:03
@@ -31,6 +32,7 @@ public class GraphTestPanel extends JPanel {
     public static final String EDGES = "graph.edges";
     public static final String AGGR = "aggregates";
 
+    public HashMap<String, Integer> domainColour;
     public ActionList getActionLayout() {
         return layout;
     }
@@ -57,7 +59,7 @@ public class GraphTestPanel extends JPanel {
 //        m_vis.setRendererFactory(new DefaultRendererFactory(tr));
 
         //DefaultRendererFactory rf = new DefaultRendererFactory(new ShapeRenderer(30));
-        DefaultRendererFactory rf = new DefaultRendererFactory(new ArchitectureImageRenderer());
+        DefaultRendererFactory rf = new DefaultRendererFactory(new ArchitectureImageRenderer(new HashMap<String,Integer>()));
 
         //Predicate p0 = ExpressionParser.predicate("ISNODE() AND parent = true");
         //rf.add(p0, new CustomRenderer(40));
@@ -162,6 +164,9 @@ public class GraphTestPanel extends JPanel {
         return m_vis;
     }
 
+    public void setDomainColours(HashMap<String, Integer> domainColour) {
+        m_vis.setRendererFactory(new DefaultRendererFactory(new ArchitectureImageRenderer(domainColour)));
+    }
 }
 
  class CustomizedForceDirectedLayout extends ForceDirectedLayout {
@@ -240,8 +245,10 @@ class ArchitectureImageRenderer extends ShapeRenderer {
     final static double pfamAHeight = 24;
     final static double pfamBHeight = 12;
     final static double gap = 6;
+    HashMap<String, Integer> domainColours;
 
-    public ArchitectureImageRenderer() {
+    public ArchitectureImageRenderer(HashMap<String,Integer> domainColours) {
+        this.domainColours = domainColours;
     }
 
     protected Shape getRawShape(VisualItem item) {
@@ -294,16 +301,17 @@ class ArchitectureImageRenderer extends ShapeRenderer {
         g.draw(new Line2D.Double(x - 4, y, x + 4
                 + (recWidth * archCount) + (gap * (archCount - 1)), y));
 
-        int[] colors = ColorLib.getCategoryPalette(archCount);
+        //int[] colors = ColorLib.getCategoryPalette(archCount);
 
         for (int i=0; i<archCount; i++) {
-            if (arches[i].substring(0,2).equals("PF")) {
-                g.setPaint(new Color(colors[i]));
+            Color c = new Color(this.domainColours.get(arches[i]));
+            if (arches[i].substring(0, 2).equals("PF")) {
+                g.setPaint(c);
                 g.fill(new Rectangle2D.Double(x, y - pfamAHeight / 2, recWidth, pfamAHeight));
                 g.setPaint(Color.black);
                 g.draw(new Rectangle2D.Double(x, y - pfamAHeight / 2, recWidth, pfamAHeight));
             } else {
-                g.setPaint(new Color(colors[i]));
+                g.setPaint(c);
                 g.fill(new Rectangle2D.Double(x, y - pfamBHeight / 2, recWidth, pfamBHeight));
                 g.setPaint(Color.black);
                 g.draw(new Rectangle2D.Double(x, y - pfamBHeight / 2, recWidth, pfamBHeight));

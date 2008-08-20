@@ -11,10 +11,14 @@ import bbk.dng.utils.NameValue;
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 
 import prefuse.data.Graph;
 import prefuse.visual.VisualItem;
 import prefuse.Constants;
+import prefuse.render.DefaultRendererFactory;
+import prefuse.util.ColorLib;
 import prefuse.activity.Activity;
 import com.mallardsoft.tuple.Pair;
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
@@ -162,10 +166,14 @@ public class Main extends SingleFrameApplication {
     public void button1ActionPerformed() throws Exception {
         String sequenceIdentifier = inputPanel.textField1.getText();
         String pfamDomainOperator = getSelection(graphCriteriaPanel.radioButtonGroup).getText().trim();
-        String organism = ((NameValue) graphCriteriaPanel.comboBox1.getSelectedItem()).getValue();
-        
+        ArrayList<String> pfamDomainsSelected = new ArrayList<String>();
 
-        System.out.printf("%s\t%s\n", pfamDomainOperator, organism);
+        for (Object t: graphCriteriaPanel.list1.getSelectedValues()) {
+            pfamDomainsSelected.add(((NameValue) t).getValue());
+        }
+
+        String organism = ((NameValue) graphCriteriaPanel.comboBox1.getSelectedItem()).getValue();
+        String sequenceSelectionOperator = graphCriteriaPanel.comboBox2.getSelectedItem().toString();
 
         Map<String, ArrayList<String>> architectures;
         ArrayList<String> domains;
@@ -180,7 +188,7 @@ public class Main extends SingleFrameApplication {
             }
 
             // find architectures with these domains
-            architectures = searcher.getArchitecturesByDomains(domains);
+            architectures = searcher.getArchitecturesByDomains(pfamDomainsSelected, pfamDomainOperator, organism);
 
             for (String a : architectures.keySet()) {
                 System.out.printf("%s\n", a);
@@ -214,6 +222,29 @@ public class Main extends SingleFrameApplication {
         ArchitectureGraphBuilder graphBuilder = new ArchitectureGraphBuilder();
         Graph g = graphBuilder.initialiseGraph(architectures, joinDomainsForArchitecture(domains));
         graphBuilder.addEdgesByMatrix(g, similarityMatrix, joinDomainsForArchitecture(domains));
+
+        // set domain colours
+        HashMap<String,Integer> domainColour = new HashMap<String,Integer>();
+        // all distinct domains
+        Set<String> d = new HashSet<String>();
+        for (String a: architectures.keySet()) {
+            for (String thisDomain: a.split("\\s"))
+                d.add(thisDomain);
+        }
+
+        int[] colors = ColorLib.getCategoryPalette(d.size());
+        int thisColour = 0;
+        for (String thisDomain: d) {
+            domainColour.put(thisDomain, colors[thisColour]);
+            thisColour++;
+        }
+
+        /*System.out.print( "Paused..." );
+        (new BufferedReader( new InputStreamReader( System.in ))).readLine();
+*/
+
+        graphPanel.setDomainColours(domainColour);
+
         graphPanel.getVisualization().removeGroup("graph");
         graphPanel.getVisualization().addGraph("graph", g);
         graphPanel.getVisualization().setValue("graph.nodes", null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
@@ -244,14 +275,28 @@ public class Main extends SingleFrameApplication {
         graphCriteriaPanel.sequenceTitle.setText("<html>" + sequence.get("entry_name") + "<br>" +
                 sequence.get("protein_name") + "</html>");
 
-        final String[] domains = sequence.get("architecture").split("\\s");
-        graphCriteriaPanel.list1.setModel(new AbstractListModel() {
-				String[] values = domains;
-				public int getSize() { return values.length; }
-				public Object getElementAt(int i) { return values[i]; }
-			});
+        String[] domains = sequence.get("architecture").split("\\s");
+
+        // get unique list of domains
+        Set<String> tmp = new HashSet<String>(Arrays.asList(domains));
+        domains = tmp.toArray(new String[tmp.size()]);
+
+        // get domain description
+        HashMap<String, HashMap<String, String>> domainDetails = searcher.getDomainDetails(domains);
+
+
+        DefaultListModel model = (DefaultListModel) graphCriteriaPanel.list1.getModel();
+        model.clear();
+
+        Arrays.sort(domains);
+        for (String d: domains) {
+            model.add(model.size(),
+                    new NameValue(domainDetails.get(d).get("accession") + " " + domainDetails.get(d).get("description")
+                            ,d));
+        }
+        
         // set all domains to selected
-        graphCriteriaPanel.list1.setSelectionInterval(0, domains.length - 1);
+        graphCriteriaPanel.list1.setSelectionInterval(0, model.size() - 1);
 
         Set<String> o2=null;
         // get all organisms with these domains
@@ -269,10 +314,12 @@ public class Main extends SingleFrameApplication {
             graphCriteriaPanel.comboBox1.removeAllItems();
         }
         
-        Collections.sort(new ArrayList<String>(o2));
+        String[] o = new String[o2.size()];
+        o2.toArray(o);
+        Arrays.sort(o);
 
-        graphCriteriaPanel.comboBox1.addItem("ALL");
-        for (String organism: o2) {
+        graphCriteriaPanel.comboBox1.addItem(new NameValue("ALL","ALL"));
+        for (String organism: o) {
             NameValue o3;
             if (organism.length() > 30) {
                 o3 = new NameValue(organism.substring(0, 25) + "...", organism);

@@ -27,11 +27,21 @@ public class SwissPfamSearcher {
         domainParser = new QueryParser("accession", sp.getDomainIndexAnalyzer());
     }
 
-    public Map<String, ArrayList<String>> getArchitecturesByDomains(ArrayList<String> domains) throws Exception {
+    public Map<String, ArrayList<String>> getArchitecturesByDomains(ArrayList<String> domains,
+                                                                    String domainOperator,
+                                                                    String organism) throws Exception {
         StringBuffer q = new StringBuffer();
         for (String d: domains) {
-            q.append(" architecture:").append(d);
+            if (domainOperator.equals("AND"))
+                q.append("+");
+            q.append("architecture:").append(d).append(" ");
         }
+
+        if (!organism.equals("ALL"))
+            q.append("+organism:\"").append(organism).append("\"");
+
+        System.out.printf("query = %s\n", q);
+
         Hits hits = architectureSearcher.search(architectureParser.parse(q.toString()));
 
         if (hits.length() == 0) {
@@ -53,14 +63,22 @@ public class SwissPfamSearcher {
         return architectures;
     }
 
-    public ArrayList<String> getDomainsBySequence(String sequenceAccession) throws Exception {
-	    Hits hits = architectureSearcher.search(architectureParser.parse("accession:" + sequenceAccession));
+    public ArrayList<String> getDomainsBySequence(String sequenceIdentifier) throws Exception {
+
+        String query = sequenceIdentifier;
+        if (sequenceIdentifier.indexOf("_") > -1) {
+            query = "entry_name:" + query;
+        } else {
+            query = "accession:" + query;
+        }
+
+        Hits hits = architectureSearcher.search(architectureParser.parse(query));
 
         if (hits.length() == 0) {
-            System.out.printf("Sequence %s not found.\n", sequenceAccession);
+            System.out.printf("Sequence %s not found.\n", sequenceIdentifier);
             return null;
         } else if (hits.length() > 1) {
-            System.out.printf("Sequence %s has %s entries!\n", sequenceAccession, hits.length());
+            System.out.printf("Sequence %s has %s entries!\n", sequenceIdentifier, hits.length());
             return null;
         }
 
@@ -129,5 +147,26 @@ public class SwissPfamSearcher {
         }
 
         return organisms;
+    }
+
+    public HashMap<String, HashMap<String, String>> getDomainDetails(String[] domains) {
+        HashMap<String, HashMap<String, String>> details = new HashMap<String, HashMap<String, String>>();
+        for (String thisDomain: domains) {
+            try {
+                Hits hits = domainSearcher.search(domainParser.parse("accession:" + thisDomain));
+                if (hits.length() > 0) {
+                    HashMap<String, String> d = new HashMap<String, String>();
+                    d.put("accession", hits.doc(0).get("accession"));
+                    d.put("id", hits.doc(0).get("id"));
+                    d.put("description", hits.doc(0).get("description"));
+                    details.put(thisDomain, d);
+                }
+
+            } catch (Exception e) {
+                System.out.printf("Error in getDomainDetails\n");
+            }
+        }
+
+        return details;
     }
 }

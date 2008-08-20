@@ -1,6 +1,7 @@
 package bbk.dng.ui.panels;
 
 import java.awt.*;
+import java.util.HashMap;
 import javax.swing.*;
 import com.jgoodies.forms.factories.*;
 /*
@@ -15,6 +16,7 @@ public class GraphCriteriaPanel extends JPanel {
     public JComboBox comboBox1;
     public  JButton button1;
     public ButtonGroup radioButtonGroup;
+    public JComboBox comboBox2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
     public GraphCriteriaPanel() {
@@ -35,7 +37,7 @@ public class GraphCriteriaPanel extends JPanel {
         JLabel label3 = new JLabel();
 		comboBox1 = new JComboBox();
         JLabel label4 = new JLabel();
-        JComboBox comboBox2 = new JComboBox();
+        comboBox2 = new JComboBox();
 		button1 = new JButton();
 
 		//======== this ========
@@ -81,12 +83,7 @@ public class GraphCriteriaPanel extends JPanel {
 		{
 
 			//---- list1 ----
-			list1.setModel(new AbstractListModel() {
-				String[] values = {
-				};
-				public int getSize() { return values.length; }
-				public Object getElementAt(int i) { return values[i]; }
-			});
+			list1.setModel(new DefaultListModel());
             list1.setVisibleRowCount(7);
             scrollPane1.setViewportView(list1);
 		}
