@@ -76,7 +76,7 @@ public class Main extends SingleFrameApplication {
             // Search tab panel
             inputPanel = new SequenceSearchBoxPanel();
             //inputPanel.button1.setAction(getAction("drawGraphAction"));
-            inputPanel.button1.setAction(getAction("sequenceSubmitted"));
+            inputPanel.button1.setAction(getAction("sequenceSubmitAction"));
 
             JPanel panel2 = new JPanel();
             panel2.setLayout(new GridBagLayout());
@@ -251,7 +251,7 @@ public class Main extends SingleFrameApplication {
     }
 
     @Action
-    public void sequenceSubmitted() {
+    public void sequenceSubmitAction() {
         // get the search string
         String sequenceIdentifier = inputPanel.textField1.getText();
 
