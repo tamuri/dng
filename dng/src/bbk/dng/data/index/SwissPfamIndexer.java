@@ -14,7 +14,7 @@ import java.util.*;
  * Date: 13-Aug-2008 12:18:16
  */
 public class SwissPfamIndexer {
-    public static final String INDEX_DIR = "/home/aut/Documents/Mental/Bioinformatics/project/dng/data_index/";
+    public static final String INDEX_DIR = "data_index/";
     private IndexWriter writer;
     public static final String SEQUENCES_DIR = "sequences";
     public static final String DOMAINS_DIR = "domains";
@@ -29,7 +29,7 @@ public class SwissPfamIndexer {
             doc.add(new Field("id", (String) allDomains.get(domain).get("id"), Field.Store.YES, Field.Index.UN_TOKENIZED));
             doc.add(new Field("description", (String) allDomains.get(domain).get("description"), Field.Store.YES, Field.Index.TOKENIZED));
             domainIndexWriter.addDocument(doc);
-            System.out.printf("Saved %s (%s, %s)\n", domain, allDomains.get(domain).get("id"), allDomains.get(domain).get("description"));
+            System.out.printf("Saved domain %s (%s, %s)\n", domain, allDomains.get(domain).get("id"), allDomains.get(domain).get("description"));
         }
 
         domainIndexWriter.optimize();
@@ -37,7 +37,7 @@ public class SwissPfamIndexer {
     }
 
     public void savePfamEntry(String accession, String architecture, String entryName,
-                              String status, String proteinName, String organism) throws Exception {
+                              String status, String proteinName, String organism, String hasPDB, String pdbCodes) throws Exception {
 
         // Create Lucene document
         Document doc = new Document();
@@ -47,17 +47,18 @@ public class SwissPfamIndexer {
         doc.add(new Field("status", status, Field.Store.YES, Field.Index.UN_TOKENIZED));
         doc.add(new Field("protein_name", proteinName, Field.Store.YES, Field.Index.NO));
         doc.add(new Field("organism", organism, Field.Store.YES, Field.Index.UN_TOKENIZED));
-
+        doc.add(new Field("has_pdb", hasPDB, Field.Store.YES, Field.Index.UN_TOKENIZED));
+        doc.add(new Field("pdb_codes", pdbCodes, Field.Store.YES, Field.Index.NO));
 
         // Add document to index
         writer.addDocument(doc);
 
-        System.out.printf("Saved %s (%s) with architecture %s\n", entryName, accession, architecture);
+        System.out.printf("Saved sequence %s (%s) with architecture %s\n", entryName, accession, architecture);
     }
 
-    public void createIndex() throws Exception {
+    public void createSequenceIndex() throws Exception {
         PerFieldAnalyzerWrapper analyzer = getArchitectureIndexAnalyzer();
-        writer = new IndexWriter(INDEX_DIR + "sequences", analyzer, true);
+        writer = new IndexWriter(INDEX_DIR + SEQUENCES_DIR, analyzer, true);
     }
 
     public PerFieldAnalyzerWrapper getArchitectureIndexAnalyzer() {
@@ -66,9 +67,10 @@ public class SwissPfamIndexer {
         analyzer.addAnalyzer("architecture", new WhitespaceAnalyzer());
         analyzer.addAnalyzer("entry_name", new KeywordAnalyzer());
         analyzer.addAnalyzer("status", new KeywordAnalyzer());
-        analyzer.addAnalyzer("status", new KeywordAnalyzer());
         analyzer.addAnalyzer("protein_name", new StandardAnalyzer());
         analyzer.addAnalyzer("organism", new KeywordAnalyzer());
+        analyzer.addAnalyzer("has_pdb", new KeywordAnalyzer());
+        analyzer.addAnalyzer("pdb_codes", new StandardAnalyzer());
 
         return analyzer;
     }
@@ -81,7 +83,7 @@ public class SwissPfamIndexer {
         return analyzer;
     }
 
-    public void closeIndex() throws Exception {
+    public void closeAndOptimizeSequenceIndex() throws Exception {
         writer.optimize();
         writer.close();
     }

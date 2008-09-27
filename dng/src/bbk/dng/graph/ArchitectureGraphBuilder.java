@@ -7,6 +7,7 @@ import java.util.*;
 
 import com.mallardsoft.tuple.Pair;
 import com.mallardsoft.tuple.Tuple;
+import bbk.dng.utils.CollectionUtils;
 
 /**
  * Date: 14-Aug-2008 14:33:23
@@ -17,59 +18,43 @@ public class ArchitectureGraphBuilder {
 
     }
 
-    public Graph initialiseGraph(Map<String, ArrayList<String>> architectures, String parentArchitecture) {
+    public Graph initialiseGraph(Map<String, List<String>> architectures, String parentArchitecture) {
         Graph g = new Graph();
         g.addColumn("name", String.class);
         g.addColumn("sequences", String.class);
         g.addColumn("parent", boolean.class);
 
         Table t = g.getNodeTable();
-        Table e = g.getEdgeTable();
-
+        //Table e = g.getEdgeTable();
 
         for (String a: architectures.keySet()) {
             int nodeId = t.addRow();
             t.setString(nodeId, "name", a);
-            StringBuffer sb = new StringBuffer();
-            for (String s: architectures.get(a)) {
-                sb.append(s).append(",");
-            }
-
+            t.setString(nodeId, "sequences", CollectionUtils.join(architectures.get(a), ','));
             if (a.equals(parentArchitecture)) {
                 t.setBoolean(nodeId, "parent", true);
             } else {
                 t.setBoolean(nodeId, "parent", false);
             }
-
-            t.setString(nodeId, "sequences", sb.toString());
-
-            
-
         }
-
-
-
         return g;
     }
 
     public Graph addEdgesByMatrix(Graph g, Map<Pair<String,String>, Double> matrix, String parentArchitecture) {
         Table graphTable = g.getNodeTable();
 
-        Set<String> connected = new HashSet<String>();
-        Set<String> unconnected = new HashSet<String>();
-        Map<String, Integer> architectureNodeId = new HashMap<String, Integer>();
-
+        Set<String> connected = CollectionUtils.newSet();
+        Set<String> unconnected = CollectionUtils.newSet();
+        Map<String, Integer> architectureNodeId = CollectionUtils.newMap();
 
         connected.add(parentArchitecture);
 
-        int total =0;
         for (int i = 0; i < graphTable.getRowCount(); i++) {
             String architecture = graphTable.getString(i, "name");
             architectureNodeId.put(architecture, i);
             if (!architecture.equals(parentArchitecture)) {
                 unconnected.add(architecture);
             }
-            total++;
         }
 
         Table edgeTable = g.getEdgeTable();
@@ -77,12 +62,13 @@ public class ArchitectureGraphBuilder {
         while (unconnected.size() > 0) {
 
             double maxscore = -999999;
-            ArrayList<String> targetsToRemove = new ArrayList<String>();
-            ArrayList<Pair<Integer,Integer>> toConnect = new ArrayList<Pair<Integer,Integer>>();
+            List<String> targetsToRemove = CollectionUtils.newList();
+            List<Pair<Integer,Integer>> toConnect = CollectionUtils.newList();
 
             for (String c: connected) {
                 // find highest scoring pair for 'c' in connected architectures
                 for (Pair<String,String> key: matrix.keySet()) {
+                    // TODO: cleanup this code to look for high-scoring score in the 'opposite' direction
                     if (Tuple.get1(key).equals(c) && !Tuple.get2(key).equals(c) && unconnected.contains(Tuple.get2(key))) {
                         if (matrix.get(key) > maxscore) {
                             maxscore = matrix.get(key);
@@ -116,15 +102,13 @@ public class ArchitectureGraphBuilder {
             if (targetsToRemove.size() > 0 && toConnect.size() > 0) {
                 for(Pair<Integer,Integer> nodePair: toConnect) {
                     int row = edgeTable.addRow();
-                    System.out.printf("joining with score %s: %s -> %s\n", maxscore, Tuple.get1(nodePair), Tuple.get2(nodePair));
                     edgeTable.setInt(row, "source", Tuple.get1(nodePair));
                     edgeTable.setInt(row, "target", Tuple.get2(nodePair));
                     edgeTable.setString(row, "name", Double.toString(maxscore));
                 }
 
-
                 for(String target: targetsToRemove) {
-                    ArrayList<String> tmp = new ArrayList<String>();
+                    List<String> tmp = CollectionUtils.newList();
                     for (String u: unconnected) {
                         if (u.equals(target)) {
                             tmp.add(u);
@@ -132,18 +116,13 @@ public class ArchitectureGraphBuilder {
                     }
 
                     for (String t: targetsToRemove) {
-                        boolean b = unconnected.remove(t);
-                        System.out.printf("removed %s - %s\n", b, t);
+                        unconnected.remove(t);
                     }
                     connected.add(target);
                 }
 
             }
-            System.out.printf("Connected:%s + %s = %s (=%s)",connected.size(), unconnected.size(), connected.size() + unconnected.size(),
-                    total);
-            System.out.printf("Total edges:%s\n", edgeTable.getRowCount());
         }
-
         return g;
     }
 }

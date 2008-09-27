@@ -49,7 +49,16 @@ public class SequenceSearchBoxPanel extends JPanel {
 		// JFormDesigner - End of component initialization  //GEN-END:initComponents
 	}
 
-    public JTextField textField1;
-	public JButton button1;
+    private JTextField textField1;
+	private JButton button1;
 	// JFormDesigner - End of variables declaration  //GEN-END:variables
+
+    public JButton getSearchButton() {
+        return button1;
+    }
+
+    public JTextField getSequenceTextField() {
+        return textField1;
+    }
+
 }

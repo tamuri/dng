@@ -5,68 +5,41 @@ import com.mallardsoft.tuple.Tuple;
 
 import java.util.*;
 
+import bbk.dng.utils.CollectionUtils;
+
 /**
  * Date: 14-Aug-2008 11:08:16
  */
 public class SimilarityCalculator {
-    final static Double GAP_SCORE = -5.0;
-    final static Double MATCH_SCORE = 20.0;
+    final static Double GAP_SCORE = -15.0;
+    final static Double MATCH_SCORE = 30.0;
     final static Double PF_SIMILAR_SCORE = 5.0;
-    final static Double PB_SIMILAR_SCORE = 2.0;
+    final static Double PB_SIMILAR_SCORE = 1.0;
     final static Double MISMATCH_SCORE = 0.0;
     final static String GAP_TEXT = "  GAP  ";
 
-    public SimilarityCalculator() {
-
-    }
-
+    public SimilarityCalculator() { }
+    
     public Map<String, Double> getSimilarityScoresForSingleArchitecture(String architecture, Set<String> architectures) {
-        Map<String, Double> similarityMatrix = new HashMap<String, Double>();
-
-        for (String arch: architectures) {
-            similarityMatrix.put(arch, getArchitectureSimilarity(architecture, arch));
+        Map<String, Double> similarityMatrix = CollectionUtils.newMap();
+        for (String a: architectures) {
+            similarityMatrix.put(a, getArchitectureSimilarity(architecture, a));
         }
-
         return similarityMatrix;
     }
 
     public ArrayList<String> getMostSimilarArchitectures(Map<String, Double> matrix, int itemsToReturn) {
-       ArrayList<Map.Entry<String, Double>> myArrayList = new ArrayList<Map.Entry<String, Double>>(matrix.entrySet());
-
-       Collections.sort(myArrayList, new MyComparator());
-
-        Iterator itr=myArrayList.iterator();
-        String key="";
-        double value=0;
-        ArrayList<String> mostSimilar = new ArrayList<String>();
-        while(itr.hasNext()){
-            Map.Entry<String, Double> e = (Map.Entry<String, Double>)itr.next();
-
-            key = e.getKey();
-            value = e.getValue();
-
-            System.out.printf("%s = %s", key, value);
-
-            mostSimilar.add(e.getKey());
-            if (mostSimilar.size() >= itemsToReturn) {
-                break;
-            }
-        }
-
-        return mostSimilar;
+        List<String> sortedArchitectures = CollectionUtils.getKeysSortedByValue(matrix, true);
+        return new ArrayList<String>(sortedArchitectures.subList(0, itemsToReturn));
     }
 
     public Map<Pair<String,String>, Double> getArchitectureSimilarityMatrix(Set<String> architectures) {
         // Given an array list of distinct architectures, returns a Map (with key of two
         // architectures) of similarity scores
         Map<Pair<String,String>, Double> similarityMatrix = initialiseArchitectureSimilarityMatrix(architectures);
-        Set<Pair<String,String>> archKeys = similarityMatrix.keySet();
 
-        int count=0;
         // Loop over each key
-        for (Pair<String,String> archKey: archKeys) {
-            count++;
-            System.out.printf("%s/%s = %s\n", count, archKeys.size(), ((100 * ((double) count/ (double)archKeys.size()))));
+        for (Pair<String,String> archKey: similarityMatrix.keySet()) {
             // If the two architectures are identical
             if (Tuple.get1(archKey).equals(Tuple.get2(archKey))) {
                 similarityMatrix.put(archKey, 100.0);
@@ -75,14 +48,13 @@ public class SimilarityCalculator {
                 similarityMatrix.put(archKey, similarity);
             }
         }
-
         return similarityMatrix;
     }
 
     private Double getArchitectureSimilarity(String archOne, String archTwo) {
         // convert each architecture into lists of domains
-        ArrayList<String> domainsOne = new ArrayList<String>(Arrays.asList(archOne.split("\\s")));
-        ArrayList<String> domainsTwo = new ArrayList<String>(Arrays.asList(archTwo.split("\\s")));
+        List<String> domainsOne = CollectionUtils.listOf(archOne.split("\\s"));
+        List<String> domainsTwo = CollectionUtils.listOf(archTwo.split("\\s"));
 
         // get similarity matrix
         Map<Pair<String,String>, Double> domainSimilarities = getDomainSimilarities(domainsOne, domainsTwo);
@@ -90,24 +62,19 @@ public class SimilarityCalculator {
         double[][] similarityMatrix = buildDomainSimilarityMatrix(domainsOne, domainsTwo, domainSimilarities);
 
         // print the domain matrix
-        //printDomainSimilarityMatrix(domainsOne, domainsTwo, similarityMatrix);
-
-
-
+        // printDomainSimilarityMatrix(domainsOne, domainsTwo, similarityMatrix);
 
         return getArchitectureAlignmentScore(domainsOne, domainsTwo, similarityMatrix, domainSimilarities);
     }
 
-    private double getArchitectureAlignmentScore(ArrayList<String> domainsOne, ArrayList<String> domainsTwo,
+    private double getArchitectureAlignmentScore(List<String> domainsOne, List<String> domainsTwo,
                                                  double[][] similarityMatrix, Map<Pair<String,String>, Double> domainSimilarities) {
         // Perform the Needleman-Wunsch alignment on these two architectures given the domain similarity matrix
         int x = domainsOne.size();
         int y = domainsTwo.size();
 
-        
-        List<String> alignedDomainsX = new ArrayList<String>();
-        List<String> alignedDomainsY = new ArrayList<String>();
-
+        List<String> alignedDomainsX = CollectionUtils.newList();
+        List<String> alignedDomainsY = CollectionUtils.newList();
 
         while (x > 0 && y > 0) {
             String domainX = domainsOne.get(x - 1);
@@ -151,7 +118,6 @@ public class SimilarityCalculator {
         Collections.reverse(alignedDomainsY);
 
         double matches = 0;
-        double mismatches = 0;
         double similar = 0;
         double gaps = 0;
 
@@ -162,31 +128,30 @@ public class SimilarityCalculator {
                 matches++;
             } else if (alignedDomainsX.get(i).substring(0,2).equals(alignedDomainsY.get(i).substring(0,2))){
                 similar++; // PF or PB aligned
-            } else {
-                mismatches++;
             }
         }
 
-
         double score = 2.0 * (matches + similar / 10.0 - gaps / Math.abs(GAP_SCORE)) / (domainsOne.size() + domainsTwo.size());
 
-        // print the alignment
-//        System.out.printf("\n\n");
-//        for (String s : alignedDomainsX) System.out.printf("%s\t\t", s);
-//        System.out.printf("\n");
-//        for (String s : alignedDomainsY) System.out.printf("%s\t\t", s);
-//        System.out.printf("\n\n");
-//
-//        System.out.printf("%s matches, %s similar, %s gaps, %s mismatches = score %s\n\n",
-//                matches, similar, gaps, mismatches, score);
+        /*
+        print the alignment
+        System.out.printf("\n\n");
+        for (String s : alignedDomainsX) System.out.printf("%s\t\t", s);
+        System.out.printf("\n");
+        for (String s : alignedDomainsY) System.out.printf("%s\t\t", s);
+        System.out.printf("\n\n");
+
+        System.out.printf("%s matches, %s similar, %s gaps, %s mismatches = score %s\n\n",
+                matches, similar, gaps, mismatches, score);
+        */
 
         return score * 100.0;
     }
 
 
-    private double[][] buildDomainSimilarityMatrix(ArrayList<String> domainsX,
-                                                   ArrayList<String> domainsY,
-                                                   Map<Pair<String,String>, Double> domainSimilarities) {
+    private double[][] buildDomainSimilarityMatrix(List<String> domainsX,
+                                                   List<String> domainsY,
+                                                   Map<Pair<String, String>, Double> domainSimilarities) {
         // Build matrix for these alignment
         double[][] matrix = new double[domainsX.size() + 1][domainsY.size() + 1];
 
@@ -211,8 +176,8 @@ public class SimilarityCalculator {
         return matrix;
     }
 
-    private Map<Pair<String,String>, Double> getDomainSimilarities(ArrayList<String> domainsOne, ArrayList<String> domainsTwo) {
-        Map<Pair<String,String>, Double> domainSimilarities = new HashMap<Pair<String,String>, Double>();
+    private Map<Pair<String,String>, Double> getDomainSimilarities(List<String> domainsOne, List<String> domainsTwo) {
+        Map<Pair<String,String>, Double> domainSimilarities = CollectionUtils.newMap();
 
         // for each domain in architecture 1
         for (String domain1: domainsOne) {
@@ -236,13 +201,13 @@ public class SimilarityCalculator {
         }
 
 
-        
+
         return domainSimilarities;
     }
 
     private Map<Pair<String,String>, Double> initialiseArchitectureSimilarityMatrix(Set<String> architectures) {
         System.out.printf("initialiseArchitectureSimilarityMatrix");
-        Map<Pair<String,String>, Double> matrix = new HashMap<Pair<String,String>, Double>();
+        Map<Pair<String,String>, Double> matrix = CollectionUtils.newMap();
 
         for (String archRow: architectures) {
             for (String archColumn: architectures) {
@@ -256,7 +221,7 @@ public class SimilarityCalculator {
         return matrix;
     }
 
-    private void printDomainSimilarityMatrix(ArrayList<String> domainsOne, ArrayList<String> domainsTwo, double[][] similarityMatrix) {
+    public void printDomainSimilarityMatrix(ArrayList<String> domainsOne, ArrayList<String> domainsTwo, double[][] similarityMatrix) {
         System.out.printf("\t\t");
         for (String s: domainsTwo) System.out.printf("%s\t", s);
         System.out.printf("\n");
@@ -274,33 +239,4 @@ public class SimilarityCalculator {
         }
         System.out.printf("\n\n");
     }
-}
-
-class MyComparator implements Comparator{
-
-    public int compare(Object obj1, Object obj2){
-
-        int result=0;Map.Entry e1 = (Map.Entry)obj1 ;
-
-        Map.Entry e2 = (Map.Entry)obj2 ;//Sort based on values.
-
-        Double value1 = (Double)e1.getValue();
-        Double value2 = (Double)e2.getValue();
-
-        if(value1.compareTo(value2)==0){
-
-            String word1=(String)e1.getKey();
-            String word2=(String)e2.getKey();
-
-            //Sort String in an alphabetical order
-            result=word1.compareToIgnoreCase(word2);
-
-        } else{
-            //Sort values in a descending order
-            result=value2.compareTo( value1 );
-        }
-
-        return result;
-    }
-
 }

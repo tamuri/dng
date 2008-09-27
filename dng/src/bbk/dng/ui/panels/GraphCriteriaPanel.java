@@ -1,7 +1,6 @@
 package bbk.dng.ui.panels;
 
 import java.awt.*;
-import java.util.HashMap;
 import javax.swing.*;
 import com.jgoodies.forms.factories.*;
 /*
@@ -11,12 +10,13 @@ import com.jgoodies.forms.factories.*;
 public class GraphCriteriaPanel extends JPanel {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
 	// Generated using JFormDesigner Open Source Project license - unknown
-	public JLabel sequenceTitle;
-    public  JList list1;
-    public JComboBox comboBox1;
-    public  JButton button1;
-    public ButtonGroup radioButtonGroup;
-    public JComboBox comboBox2;
+	private JLabel sequenceTitle;
+    private JList list1;
+    private JComboBox comboBox1;
+    private JButton button1;
+    private JButton button2;
+    private ButtonGroup radioButtonGroup;
+    private JComboBox comboBox2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
     public GraphCriteriaPanel() {
@@ -39,6 +39,7 @@ public class GraphCriteriaPanel extends JPanel {
         JLabel label4 = new JLabel();
         comboBox2 = new JComboBox();
 		button1 = new JButton();
+        button2 = new JButton();
 
 		//======== this ========
 		setBorder(Borders.TABBED_DIALOG_BORDER);
@@ -60,20 +61,21 @@ public class GraphCriteriaPanel extends JPanel {
 			panel1.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
 			//---- label2 ----
-			label2.setText("Pfam Domains: ");
+			label2.setText("Select domains of interest:  ");
 			panel1.add(label2);
 
-			//---- radioButton1 ----
+            //---- radioButton1 ----
 			radioButton1.setText("AND ");
 			panel1.add(radioButton1);
 
-			//---- radioButton2 ----
-			radioButton2.setText("OR");
+            //---- radioButton2 ----
+			radioButton2.setText("OR  ");
 			panel1.add(radioButton2);
 
             radioButtonGroup = new ButtonGroup();
             radioButtonGroup.add(radioButton1);
             radioButtonGroup.add(radioButton2);
+            radioButtonGroup.setSelected(radioButton2.getModel(), true);
         }
 		add(panel1, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
 			GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -130,8 +132,42 @@ public class GraphCriteriaPanel extends JPanel {
 		add(button1, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
 			GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 			new Insets(0, 0, 0, 0), 0, 0));
+
+        //---- button2 ----
+		/*button2.setText("Reset");
+		button2.setSelectedIcon(null);
+		add(button2, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0,
+			GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+			new Insets(0, 0, 0, 0), 0, 0));*/
+
 		// JFormDesigner - End of component initialization  //GEN-END:initComponents
 	}
 
+    public JButton getDrawGraphButton() {
+        return button1;
+    }
 
+    public ButtonGroup getDomainOperatorRadioButtonGroup() {
+        return radioButtonGroup;
+    }
+
+    public JList getDomainList() {
+        return list1;
+    }
+
+    public JComboBox getOrganismComboBox() {
+        return comboBox1;
+    }
+
+    public JComboBox getPdbOptionComboBox() {
+        return comboBox2;
+    }
+
+    public JLabel getSequenceInfoLabel() {
+        return sequenceTitle;
+    }
+
+    public JButton getResetButton() {
+        return button2;
+    }
 }

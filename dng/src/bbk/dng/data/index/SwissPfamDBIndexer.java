@@ -29,12 +29,12 @@ public class SwissPfamDBIndexer {
         System.out.printf("Creating index at %s.\n", start);
 
         SwissPfamIndexer indexer = new SwissPfamIndexer();
-        indexer.createIndex();
+        indexer.createSequenceIndex();
 
         SwissPfamDBIndexer fileIndexer = new SwissPfamDBIndexer(indexer);
         fileIndexer.run();
 
-        indexer.closeIndex();
+        indexer.closeAndOptimizeSequenceIndex();
 
         long end = System.currentTimeMillis();
         System.out.printf("Closing index at %s. Took %s\n", end, end - start);

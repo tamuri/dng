@@ -1,5 +1,7 @@
 package bbk.dng.data.index;
 
+import bbk.dng.utils.CollectionUtils;
+
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.Reader;
@@ -55,7 +57,7 @@ public class SwissPfamFileIndexer {
             if (startMatcher.find()) {
                 // if we already have a record, save it
                 if (proteinId != null) {
-                    this.indexer.savePfamEntry(null, null, null, null, null, null);
+                    this.indexer.savePfamEntry(null, null, null, null, null, null, null, null);
                 }
 
                 proteinId = startMatcher.group(1);
@@ -71,9 +73,10 @@ public class SwissPfamFileIndexer {
                     // save the domain in our global list (for accession->id & description lookup)
                     // group(1) = accession, group(2) = id, group(3) = description, group(4) = positions
                     if (!allDomains.containsKey(domainMatcher.group(2))) {
-                        Map<String,String> d = new HashMap<String,String>();
-                        d.put("id", domainMatcher.group(1));
-                        d.put("description", domainMatcher.group(3));
+                        Map<String,String> d = CollectionUtils.mapOf(
+                                "id",           domainMatcher.group(1),
+                                "description",  domainMatcher.group(3)
+                        );
                         allDomains.put(domainMatcher.group(2), d);
                     }
 
@@ -91,7 +94,7 @@ public class SwissPfamFileIndexer {
         }
         
         // action the last entry of the file
-        this.indexer.savePfamEntry(null, null, null, null, null, null);
+        this.indexer.savePfamEntry(null, null, null, null, null, null, null, null);
 
         // action the complete list of domains
         this.indexer.saveAllDomains(allDomains);
@@ -110,13 +113,13 @@ public class SwissPfamFileIndexer {
         System.out.printf("Creating index at %s.\n", start);
 
         SwissPfamIndexer indexer = new SwissPfamIndexer();
-        indexer.createIndex();
+        indexer.createSequenceIndex();
 
         SwissPfamFileIndexer fileIndexer = new SwissPfamFileIndexer(indexer);
 
         fileIndexer.run(SWISSPFAM_FILEPATH);
 
-        indexer.closeIndex();
+        indexer.closeAndOptimizeSequenceIndex();
 
         long end = System.currentTimeMillis();
         System.out.printf("Closing index at %s. Took %s\n", end, end - start);
