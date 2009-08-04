@@ -13,116 +13,127 @@ import bbk.dng.utils.CollectionUtils;
  * Date: 14-Aug-2008 14:33:23
  */
 public class ArchitectureGraphBuilder {
-    // Takes an architecture pairwise similarity matrix and builds a graph
-    public ArchitectureGraphBuilder () {
 
+  private int parentNodeId = 0;
+
+  // Takes an architecture pairwise similarity matrix and builds a graph
+  public ArchitectureGraphBuilder() {
+  }
+
+  public Graph initialiseGraph(Map<String, List<String>> architectures,
+          String parentArchitecture,
+          Map<String, List<String>> archPDBListPair,
+          Map<String, String> archCoveragePair,
+          Map<String, List<String>> archEnzymeListPair,
+          Set<Map<String, String>> archSet) {
+    Graph g = new Graph();
+    g.addColumn("name", String.class);
+    g.addColumn("label", String.class);
+    g.addColumn("type", String.class);
+    g.addColumn("sequences", String.class);
+    g.addColumn("parent", boolean.class);
+    /* RAL 1 Jul 09 --> */
+    g.addColumn("pdb_codes", String.class);
+    g.addColumn("3D_coverage", String.class);
+    g.addColumn("enzymes", String.class);
+    g.addColumn("nseqs", int.class);
+    g.addColumn("arch_id", int.class);
+    /* <-- RAL 1 Jul 09 */
+
+    Table t = g.getNodeTable();
+    //Table e = g.getEdgeTable();
+
+    for (String a : architectures.keySet()) {
+      int nodeId = t.addRow();
+      t.setString(nodeId, "name", a);
+      t.setString(nodeId, "label", a);
+      t.setString(nodeId, "type", "architecture");
+      t.setString(nodeId, "sequences",
+              CollectionUtils.join(architectures.get(a), ','));
+      if (a.equals(parentArchitecture)) {
+        t.setBoolean(nodeId, "parent", true);
+        parentNodeId = nodeId;
+      } else {
+        t.setBoolean(nodeId, "parent", false);
+      }
+//            t.setString(nodeId, "nSeqs", architectures.get(a));
+
+      /* RAL 1 Jul 09 --> */
+      // Add the list of PDB codes
+      t.setString(nodeId, "pdb_codes",
+              CollectionUtils.join(archPDBListPair.get(a), ':'));
+
+      // Add the 3D coverage
+      t.setString(nodeId, "3D_coverage", archCoveragePair.get(a));
+
+      // Add the enzyme classes, if present
+      if (archEnzymeListPair.get(a) != null) {
+        t.setString(nodeId, "enzymes",
+                CollectionUtils.join(archEnzymeListPair.get(a), ':'));
+      }
+
+      // Get the total number of sequences that this architecture node has
+      boolean done = false;
+      Iterator iArch = archSet.iterator();
+      while (iArch.hasNext() && !done) {
+        // Get the next architecture record
+        Map<String, String> archDetails = (Map<String, String>) iArch.next();
+
+        // Get this architecture
+        String architecture = archDetails.get("architecture");
+
+        // If this is our architecture, then save the node number and number of
+        // sequences
+        if (architecture.equals(a)) {
+          // Add to current node
+          t.setString(nodeId, "arch_id", archDetails.get("arch_id"));
+          t.setString(nodeId, "nseqs", archDetails.get("nseqs"));
+
+          // Set flag that we're done
+          done = true;
+        }
+      }
+      /* <-- RAL 1 Jul 09 */
+    }
+    return g;
+  }
+
+  // Add the edges read in from the search results file (replaces the
+  // addEdgesByMatrix routine)
+  public Graph addEdges(Graph g,
+          Map<Pair<String, String>, Integer> connectionsList,
+          String parentArchitecture) {
+    Table graphTable = g.getNodeTable();
+    Table edgeTable = g.getEdgeTable();
+
+    Map<String, Integer> architectureNodeId = CollectionUtils.newMap();
+
+    for (int i = 0; i < graphTable.getRowCount(); i++) {
+      String architecture = graphTable.getString(i, "name");
+      architectureNodeId.put(architecture, i);
     }
 
-    public Graph initialiseGraph(Map<String, List<String>> architectures, String parentArchitecture) {
-        Graph g = new Graph();
-        g.addColumn("name", String.class);
-        g.addColumn("sequences", String.class);
-        g.addColumn("parent", boolean.class);
+    // Loop through the connections list and add to graph's edges
+    for (Pair<String, String> nodePair : connectionsList.keySet()) {
+      int row = edgeTable.addRow();
 
-        Table t = g.getNodeTable();
-        //Table e = g.getEdgeTable();
+      String architecture1 = Tuple.get1(nodePair);
+      String architecture2 = Tuple.get2(nodePair);
+      int dist = connectionsList.get(nodePair);
 
-        for (String a: architectures.keySet()) {
-            int nodeId = t.addRow();
-            t.setString(nodeId, "name", a);
-            t.setString(nodeId, "sequences", CollectionUtils.join(architectures.get(a), ','));
-            if (a.equals(parentArchitecture)) {
-                t.setBoolean(nodeId, "parent", true);
-            } else {
-                t.setBoolean(nodeId, "parent", false);
-            }
-        }
-        return g;
+      Pair<Integer, Integer> toConnect = Tuple.from(architectureNodeId.get(architecture1),
+              architectureNodeId.get(architecture2));
+
+      edgeTable.setInt(row, "source", Tuple.get1(toConnect));
+      edgeTable.setInt(row, "target", Tuple.get2(toConnect));
+      edgeTable.setString(row, "name", Integer.toString(dist));
     }
 
-    public Graph addEdgesByMatrix(Graph g, Map<Pair<String,String>, Double> matrix, String parentArchitecture) {
-        Table graphTable = g.getNodeTable();
+    return g;
+  }
 
-        Set<String> connected = CollectionUtils.newSet();
-        Set<String> unconnected = CollectionUtils.newSet();
-        Map<String, Integer> architectureNodeId = CollectionUtils.newMap();
-
-        connected.add(parentArchitecture);
-
-        for (int i = 0; i < graphTable.getRowCount(); i++) {
-            String architecture = graphTable.getString(i, "name");
-            architectureNodeId.put(architecture, i);
-            if (!architecture.equals(parentArchitecture)) {
-                unconnected.add(architecture);
-            }
-        }
-
-        Table edgeTable = g.getEdgeTable();
-
-        while (unconnected.size() > 0) {
-
-            double maxscore = -999999;
-            List<String> targetsToRemove = CollectionUtils.newList();
-            List<Pair<Integer,Integer>> toConnect = CollectionUtils.newList();
-
-            for (String c: connected) {
-                // find highest scoring pair for 'c' in connected architectures
-                for (Pair<String,String> key: matrix.keySet()) {
-                    // TODO: cleanup this code to look for high-scoring score in the 'opposite' direction
-                    if (Tuple.get1(key).equals(c) && !Tuple.get2(key).equals(c) && unconnected.contains(Tuple.get2(key))) {
-                        if (matrix.get(key) > maxscore) {
-                            maxscore = matrix.get(key);
-                            toConnect.clear();
-                            targetsToRemove.clear();
-                            toConnect.add(Tuple.from(architectureNodeId.get(c), architectureNodeId.get(Tuple.get2(key))));
-                            targetsToRemove.add(Tuple.get2(key));
-                        } else if (matrix.get(key) == maxscore && c.equals(parentArchitecture)) {
-                            toConnect.clear();
-                            targetsToRemove.clear();
-                            toConnect.add(Tuple.from(architectureNodeId.get(c), architectureNodeId.get(Tuple.get2(key))));
-                            targetsToRemove.add(Tuple.get2(key));
-                        }
-                    } else if (Tuple.get2(key).equals(c) && !Tuple.get1(key).equals(c) && unconnected.contains(Tuple.get1(key))) {
-                        if (matrix.get(key) > maxscore) {
-                            maxscore = matrix.get(key);
-                            toConnect.clear();
-                            targetsToRemove.clear();
-                            toConnect.add(Tuple.from(architectureNodeId.get(c), architectureNodeId.get(Tuple.get1(key))));
-                            targetsToRemove.add(Tuple.get1(key));
-                        } else if (matrix.get(key) == maxscore && c.equals(parentArchitecture)) {
-                            toConnect.clear();
-                            targetsToRemove.clear();
-                            toConnect.add(Tuple.from(architectureNodeId.get(c), architectureNodeId.get(Tuple.get1(key))));
-                            targetsToRemove.add(Tuple.get1(key));
-                        }
-                    }
-                }
-            }
-
-            if (targetsToRemove.size() > 0 && toConnect.size() > 0) {
-                for(Pair<Integer,Integer> nodePair: toConnect) {
-                    int row = edgeTable.addRow();
-                    edgeTable.setInt(row, "source", Tuple.get1(nodePair));
-                    edgeTable.setInt(row, "target", Tuple.get2(nodePair));
-                    edgeTable.setString(row, "name", Double.toString(maxscore));
-                }
-
-                for(String target: targetsToRemove) {
-                    List<String> tmp = CollectionUtils.newList();
-                    for (String u: unconnected) {
-                        if (u.equals(target)) {
-                            tmp.add(u);
-                        }
-                    }
-
-                    for (String t: targetsToRemove) {
-                        unconnected.remove(t);
-                    }
-                    connected.add(target);
-                }
-
-            }
-        }
-        return g;
-    }
+  // Get the list of species details
+  public int getParentNodeId() {
+    return parentNodeId;
+  }
 }

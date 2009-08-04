@@ -22,7 +22,7 @@ public class DataPaneActions {
         return new DataPaneHyperlinkListener();
     }
 
-    private class DataPaneHyperlinkListener implements HyperlinkListener {
+    public class DataPaneHyperlinkListener implements HyperlinkListener {
         public void hyperlinkUpdate(HyperlinkEvent event) {
             URL url = event.getURL();
             if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
