@@ -21,6 +21,7 @@ public class RenderingCountdown implements Runnable {
     private static boolean running = false;
     private static boolean restart = false;
     private static int countdownSteps = 10;
+
     private CountdownPainter dsp;
 
     public RenderingCountdown(AppFrame appFrame) {

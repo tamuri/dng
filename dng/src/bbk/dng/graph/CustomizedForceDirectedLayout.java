@@ -48,7 +48,8 @@ public class CustomizedForceDirectedLayout extends ForceDirectedLayout {
           double dist = Double.parseDouble(e.getString("name"));
           i = (int) Math.round(Math.sqrt(dist) * factor * dFactor);
         } else {
-            i = (int) (nParentDomains * factor / 5);
+//            i = (int) (nParentDomains * factor / 5);
+            i = (int) (nParentDomains * factor / 2);
         }
         return i;
     }

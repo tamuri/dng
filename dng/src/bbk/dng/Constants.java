@@ -35,10 +35,11 @@ public class Constants {
   public static final String URL_CATH
           = "http://www.cathdb.info/cathnode/";
   public static final String URL_PFAM
-          = "http://pfam.sanger.ac.uk/family?acc=";
+//          = "http://pfam.sanger.ac.uk/family?acc=";
+          = "http://pfam.xfam.org/family?acc=";
   public static final String URL_UNIPROT
           = "http://www.uniprot.org/uniprot/";
-
+          
   // Node types
   public static final int SEQ_NODE = 0;
   public static final int STRUC_NODE = 1;

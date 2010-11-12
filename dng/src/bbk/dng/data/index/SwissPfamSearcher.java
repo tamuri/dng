@@ -4,19 +4,18 @@ package bbk.dng.data.index;
 // import org.apache.lucene.queryParser.QueryParser;
 
 import bbk.dng.Constants;
-import java.util.*;
-import java.io.IOException;
-
 import bbk.dng.utils.CollectionUtils;
 import com.mallardsoft.tuple.Pair;
 import com.mallardsoft.tuple.Tuple;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * Date: 13-Aug-2008 20:13:08
@@ -340,6 +339,7 @@ public class SwissPfamSearcher {
 
             // Architecture record: architecture, etc
               case ARCHITECTURE_RECORD:
+
                 // Extract the fields on this line
                 String[] afield = new String[3];
                 // Extract the fields in this line
@@ -373,6 +373,7 @@ public class SwissPfamSearcher {
 
             // Hit records: UniProt seq, architecture, protein, etc
               case HIT_RECORD:
+
                 // Extract the fields on this line
                 String[] field = new String[7];
 
@@ -411,6 +412,7 @@ public class SwissPfamSearcher {
               // EC records: EC number and number of sequences in current
               // architecture
               case EC_RECORD:
+
                 // Extract the fields on this line
                 String[] efield = new String[3];
 

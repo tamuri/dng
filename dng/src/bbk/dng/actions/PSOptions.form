@@ -51,7 +51,7 @@
                       <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace pref="28" max="32767" attributes="0"/>
+              <EmptySpace pref="49" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -80,7 +80,9 @@
   <SubComponents>
     <Component class="javax.swing.JLabel" name="headingLabel">
       <Properties>
-        <Property name="font" type="java.awt.Font" resourceKey="headingLabel.font"/>
+        <Property name="font" type="java.awt.Font" noResource="true" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Times New Roman" size="14" style="1"/>
+        </Property>
         <Property name="text" type="java.lang.String" resourceKey="headingLabel.text"/>
         <Property name="name" type="java.lang.String" value="headingLabel" noResource="true"/>
       </Properties>
@@ -90,6 +92,7 @@
         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
           <ComponentRef name="orientationButtonGroup"/>
         </Property>
+        <Property name="font" type="java.awt.Font" resourceKey="portraitRadioButton.font"/>
         <Property name="selected" type="boolean" value="true"/>
         <Property name="text" type="java.lang.String" resourceKey="portraitRadioButton.text"/>
         <Property name="name" type="java.lang.String" value="portraitRadioButton" noResource="true"/>
@@ -107,12 +110,14 @@
         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
           <ComponentRef name="orientationButtonGroup"/>
         </Property>
+        <Property name="font" type="java.awt.Font" resourceKey="landscapeRadioButton.font"/>
         <Property name="text" type="java.lang.String" resourceKey="landscapeRadioButton.text"/>
         <Property name="name" type="java.lang.String" value="landscapeRadioButton" noResource="true"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="okButton">
       <Properties>
+        <Property name="font" type="java.awt.Font" resourceKey="okButton.font"/>
         <Property name="text" type="java.lang.String" resourceKey="okButton.text"/>
         <Property name="name" type="java.lang.String" value="okButton" noResource="true"/>
       </Properties>
@@ -122,6 +127,7 @@
     </Component>
     <Component class="javax.swing.JButton" name="cancelButton">
       <Properties>
+        <Property name="font" type="java.awt.Font" resourceKey="cancelButton.font"/>
         <Property name="text" type="java.lang.String" resourceKey="cancelButton.text"/>
         <Property name="name" type="java.lang.String" value="cancelButton" noResource="true"/>
       </Properties>

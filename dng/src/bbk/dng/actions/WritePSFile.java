@@ -7,7 +7,6 @@ package bbk.dng.actions;
 
 import bbk.dng.graph.GraphPanel;
 import bbk.dng.ui.panels.AppFrame;
-import bbk.dng.utils.CollectionUtils;
 import prefuse.data.Tuple;
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
@@ -33,9 +32,6 @@ class WritePSFile {
   //
   private final static int    X = 0;
   private final static int    Y = 1;
-  private final static int    ARCH_NODE = 0;
-  private final static int    SATELLITE_NODE = 1;
-  private final static String[] NODE_DESC = {"Architecture", "Satellite"};
 
 
   //
@@ -108,16 +104,18 @@ class WritePSFile {
 
       // Pick up all the graph nodes
       Map<Integer, VisualItem> nodeMap
-              = getGraphNodesMap(vis, domainSeparator);
+              = appFrame.getGraphPanel().getGraphNodesMap(vis);
 
       // Plot all the graph edges
       plotGraphEdges(psFile, vis, scale, nodeMap);
 
       // Plot only satellite nodes
-      plotGraphNodes(psFile, vis, scale, SATELLITE_NODE, useCATH, domainSeparator);
+      plotGraphNodes(psFile, vis, scale, GraphPanel.SATELLITE_NODE, useCATH,
+              domainSeparator);
 
       // Plot the architecture nodes
-      plotGraphNodes(psFile, vis, scale, ARCH_NODE, useCATH, domainSeparator);
+      plotGraphNodes(psFile, vis, scale, GraphPanel.ARCH_NODE, useCATH,
+              domainSeparator);
 
     // If error writing file, set flag
     } catch (IOException error) {
@@ -184,21 +182,24 @@ class WritePSFile {
       VisualItem node1 = nodeMap.get(t.getInt(row, "source"));
       VisualItem node2 = nodeMap.get(t.getInt(row, "target"));
 
-      // Get their coords
-      float coords1[] = new float[2];
-      float coords2[] = new float[2];
-      coords1[X] = (float) node1.getX();
-      coords1[Y] = (float) node1.getY();
-      coords2[X] = (float) node2.getX();
-      coords2[Y] = (float) node2.getY();
+      // Plot edge only if both nodes are visible
+      if (node1.isVisible() && node2.isVisible()) {
+        // Get their coords
+        float coords1[] = new float[2];
+        float coords2[] = new float[2];
+        coords1[X] = (float) node1.getX();
+        coords1[Y] = (float) node1.getY();
+        coords2[X] = (float) node2.getX();
+        coords2[Y] = (float) node2.getY();
 
-      // Calculate the PostScript coords of each point
-      float psCoords1[] = calcPlotCoords(scale, coords1);
-      float psCoords2[] = calcPlotCoords(scale, coords2);
+        // Calculate the PostScript coords of each point
+        float psCoords1[] = calcPlotCoords(scale, coords1);
+        float psCoords2[] = calcPlotCoords(scale, coords2);
 
-      // Plot this edge
-      psFile.psDrawLine(psCoords1[X], psCoords1[Y], psCoords2[X], psCoords2[Y],
-              plotWidth, colour);
+        // Plot this edge
+        psFile.psDrawLine(psCoords1[X], psCoords1[Y], psCoords2[X], psCoords2[Y],
+                plotWidth, colour);
+      }
     }
   }
 
@@ -217,33 +218,6 @@ class WritePSFile {
     return psCoords;
   }
 
-  // Return a map of the visible nodes on the graph
-  private Map<Integer, VisualItem> getGraphNodesMap(Visualization vis,
-          String domainSeparator) {
-
-    // Get the graph nodes
-    TupleSet ts = vis.getGroup(GraphPanel.NODES);
-
-    // Create a map between the nodes and their visual items
-    Map<Integer, VisualItem> nodeMap = CollectionUtils.newMap();
-
-    // Loop to get all the architecture nodes on the plot
-    Iterator iter = ts.tuples();
-    while (iter.hasNext()) {
-      Tuple tup = (Tuple) iter.next();
-      VisualItem node = vis.getVisualItem(GraphPanel.NODES, tup);
-
-      // Get this node's row number
-      int row = node.getRow();
-
-      // Save the row number and link to corresponding visual item
-      nodeMap.put(row, node);
-    }
-
-    // Return the node map
-    return nodeMap;
-  }
-
   // Plot the graph nodes
   private void plotGraphNodes(PostScript psFile, Visualization vis, Scale scale,
           int plotNodeType, boolean useCATH, String domainSeparator) {
@@ -251,9 +225,12 @@ class WritePSFile {
     Color colour = Color.BLACK;
     float lineWidth;
     float textSize = scale.getScaleFactor() * bbk.dng.Constants.TEXT_SIZE;
+// DEBUG
+    int nVisible = 0;
+    int nInVisible = 0;
 
     // Write remark record
-    psFile.psComment("GRAPH NODES: " + NODE_DESC[plotNodeType] + " nodes");
+    psFile.psComment("GRAPH NODES: " + GraphPanel.NODE_DESC[plotNodeType] + " nodes");
 
     // Set the edge thickness
     lineWidth = scale.getScaleFactor() * bbk.dng.Constants.LINE_THICKNESS;
@@ -277,11 +254,11 @@ class WritePSFile {
       double height = node.getBounds().getHeight();
 
       // Get the node type
-      int nodeType = ARCH_NODE;
+      int nodeType = GraphPanel.ARCH_NODE;
       int aType = bbk.dng.Constants.NORMAL;
       if (!node.getSourceTuple().getString("name").
               equals(node.getSourceTuple().getString("sequences"))) {
-        nodeType = ARCH_NODE;
+        nodeType = GraphPanel.ARCH_NODE;
 
         // Determine if this is the parent architecture
         if (node.getSourceTuple().getBoolean("parent")) {
@@ -289,11 +266,19 @@ class WritePSFile {
           parent = true;
         }
       } else {
-        nodeType = SATELLITE_NODE;
+        nodeType = GraphPanel.SATELLITE_NODE;
+      }
+// DEBUG
+      if (!node.isVisible()) {
+        nInVisible++;
+        System.out.println("Invisible node: " + node.getSourceTuple().getString("name"));
+      }
+      else {
+        nVisible++;
       }
 
       // If this is the right node type, then plot
-      if (nodeType == plotNodeType) {
+      if (nodeType == plotNodeType && node.isVisible()) {
 
         // Get the coords of the SW and NE corners
         float coords1[] = new float[2];
@@ -306,7 +291,7 @@ class WritePSFile {
         // Get the fill colour
         int fillColour = node.getFillColor();
         Color fColour = ColorLib.getColor(fillColour);
-        if (nodeType == ARCH_NODE) {
+        if (nodeType == GraphPanel.ARCH_NODE) {
           fColour = Color.white;
           if (aType == bbk.dng.Constants.PARENT) {
             fColour = bbk.dng.Constants.getColourFromIntRGB(bbk.dng.Constants.PARENT_COL[0],
@@ -334,7 +319,7 @@ class WritePSFile {
                 lineWidth, colour);
 
         // If not an architecture node, write the text in the box
-        if (nodeType == SATELLITE_NODE) {
+        if (nodeType == GraphPanel.SATELLITE_NODE) {
           
           // Calculate the text coords
           coords1[X] = (float) x;
@@ -353,6 +338,10 @@ class WritePSFile {
         }
       }
     }
+// DEBUG
+    System.out.println("Number of visible nodes    = " + nVisible);
+    System.out.println("Number of invisible nodes  = " + nInVisible);
+    System.out.println("TOTAL                      = " + (nVisible + nInVisible));
   }
 
   // Plot the sequence of domains for this architecture node

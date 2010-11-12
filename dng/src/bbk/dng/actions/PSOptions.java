@@ -64,11 +64,12 @@ public class PSOptions extends javax.swing.JDialog {
     setTitle(resourceMap.getString("Form.title")); // NOI18N
     setName("Form"); // NOI18N
 
-    headingLabel.setFont(resourceMap.getFont("headingLabel.font")); // NOI18N
+    headingLabel.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
     headingLabel.setText(resourceMap.getString("headingLabel.text")); // NOI18N
     headingLabel.setName("headingLabel"); // NOI18N
 
     orientationButtonGroup.add(portraitRadioButton);
+    portraitRadioButton.setFont(resourceMap.getFont("portraitRadioButton.font")); // NOI18N
     portraitRadioButton.setSelected(true);
     portraitRadioButton.setText(resourceMap.getString("portraitRadioButton.text")); // NOI18N
     portraitRadioButton.setName("portraitRadioButton"); // NOI18N
@@ -78,9 +79,11 @@ public class PSOptions extends javax.swing.JDialog {
     orientationLabel.setName("orientationLabel"); // NOI18N
 
     orientationButtonGroup.add(landscapeRadioButton);
+    landscapeRadioButton.setFont(resourceMap.getFont("landscapeRadioButton.font")); // NOI18N
     landscapeRadioButton.setText(resourceMap.getString("landscapeRadioButton.text")); // NOI18N
     landscapeRadioButton.setName("landscapeRadioButton"); // NOI18N
 
+    okButton.setFont(resourceMap.getFont("okButton.font")); // NOI18N
     okButton.setText(resourceMap.getString("okButton.text")); // NOI18N
     okButton.setName("okButton"); // NOI18N
     okButton.addActionListener(new java.awt.event.ActionListener() {
@@ -89,6 +92,7 @@ public class PSOptions extends javax.swing.JDialog {
       }
     });
 
+    cancelButton.setFont(resourceMap.getFont("cancelButton.font")); // NOI18N
     cancelButton.setText(resourceMap.getString("cancelButton.text")); // NOI18N
     cancelButton.setName("cancelButton"); // NOI18N
     cancelButton.addActionListener(new java.awt.event.ActionListener() {
@@ -118,7 +122,7 @@ public class PSOptions extends javax.swing.JDialog {
             .addComponent(okButton)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
             .addComponent(cancelButton)))
-        .addContainerGap(28, Short.MAX_VALUE))
+        .addContainerGap(49, Short.MAX_VALUE))
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

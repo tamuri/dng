@@ -226,6 +226,29 @@ public class GraphActions {
 
           // Close off the page
           sb.append("</p></body></html>");
+
+          // Get which button was pressed
+          int buttonPressed = event.getButton();
+          int buttonModifiers = event.getModifiers();
+          boolean shiftPressed = false;
+          String modifiers
+                  = MouseEvent.getMouseModifiersText(buttonModifiers).toUpperCase();
+          if (modifiers.indexOf("SHIFT") > -1) {
+            shiftPressed = true;
+          }
+
+          // If right button clicked (or shift-left) then remove all of
+          // network except for nodes leading to parent (unless parent
+          // clicked, in which case redisplay entire network
+          if (buttonPressed == MouseEvent.BUTTON1 && shiftPressed) {
+
+            // Get visualisation
+            Visualization vis = ((Display) event.getSource()).getVisualization();
+
+            // Prune out all nodes except those between the clicked node
+            // and the parent node
+            appFrame.getGraphPanel().tracePathToParent(vis, item, architecture, useCATH);
+          }
         }
 
         appFrame.getDataPane().setAutoscrolls(false);

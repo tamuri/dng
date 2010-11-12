@@ -6,19 +6,16 @@ import bbk.dng.actions.GraphStylePanelActions;
 import bbk.dng.actions.SearchPanelActions;
 import bbk.dng.data.index.SwissPfamSearcher;
 import bbk.dng.ui.panels.AppFrame;
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 import edu.stanford.ejalbert.BrowserLauncher;
+import java.awt.*;
+import java.net.URL;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.SingleFrameApplication;
 import prefuse.data.Graph;
 
-import javax.swing.*;
-import java.awt.*;
-import java.net.URL;
-
 /**
- * @author Asif Tamuri
+ * @author Asif Tamuri and Roman Laskowski
  * @email asif@tamuri.com
  * @date 13-Aug-2008
  *
@@ -37,6 +34,10 @@ public class Main extends SingleFrameApplication {
   public static boolean useCATH = false;
   public static boolean useSSG = false;
   /* <-- RAL 17 Jun 10 */
+// RAL 22 Oct 10 -->
+  public static boolean offLine = false;
+  public static boolean addEnzymes = false;
+// <-- RAL 22 Oct 10
   public static Graph graph;
   /* RAL 1 Jul 09 --> */
   public static String pfamId = null;
@@ -76,6 +77,10 @@ public class Main extends SingleFrameApplication {
     useCATH = false;
     useSSG = false;
   /* <-- RAL 17 Jun 10 */
+// RAL 22 Oct 10 -->
+    offLine = false;
+    addEnzymes = false;
+// <-- RAL 22 Oct 10
 
     // Loop through command arguments
     for (int i = 0; i < num; i++) {
@@ -108,6 +113,24 @@ public class Main extends SingleFrameApplication {
         // Set flag
         useCATH = true;
       }
+
+// RAL 22 Oct 10 -->
+      // Check for the -offline flag indicating that PostScript file of plot
+      // to be generated off-line
+      else if (args[i].equals("-offline")) {
+
+        // Set flag
+        offLine = true;
+      }
+
+      // Check for the -ec flag indicating that E.C. satellite nodes to be
+      // added to PostScript plot
+      else if (args[i].equals("-ec")) {
+
+        // Set flag
+        addEnzymes = true;
+      }
+// <-- RAL 22 Oct 10
 
       // Check for the -ssg flag indicating that we are using SSG annotations,
       // rather than E.C. numbers
@@ -149,6 +172,7 @@ public class Main extends SingleFrameApplication {
           remoteSearch = true;
           i++;
         }
+
       } // Otherwise, take this to be the name of the data index directory
       else {
         indexDir = args[i];
@@ -168,10 +192,19 @@ public class Main extends SingleFrameApplication {
 //    indexDir = "C:\\roman\\pdbsum\\data\\archindex_A0A1F2.txt";
 //    indexDir = "C:\\roman\\pdbsum\\data\\archindex_P0AGE9.txt";
 //    indexDir = "C:\\roman\\pdbsum\\data\\archindex_A5VNG2.txt";
-//    indexDir = "C:\\roman\\pdbsum\\data\\archindex_Q9RPT1_ssg.txt";
-//    indexDir = "C:\\roman\\pdbsum\\data\\archindex_C3Y4H7.txt";
 //    indexDir = "C:\\roman\\talks\\argonne10\\archschema\\archindex_pfam.out";
-
+//    indexDir = "C:\\roman\\pdbsum\\data\\archindex.out";
+//    indexDir = "C:\\roman\\pdbsum\\data\\archindex_BRCA2.txt";
+//    indexDir = "C:\\roman\\pdbsum\\data\\archindex_C3Y4H7.txt";
+//      indexDir = "C:\\roman\\pdbsum\\data\\archindex_Q9RPT1.txt";
+//      indexDir = "C:\\roman\\pdbsum\\data\\archindex_3_90_226_10.out";
+//      indexDir = "C:\\roman\\pdbsum\\data\\archindex_3_40_50_1000.out";
+//      indexDir = "C:\\roman\\pdbsum\\data\\archindex_1_10_600_10.out";
+// DEBUG
+//      indexDir = "D:\\archindex.txt";
+//      useCATH = true;
+// DEBUG
+      
     // Load ArchSchema searcher
     try {
       // Define new searcher using archindex
@@ -189,33 +222,45 @@ public class Main extends SingleFrameApplication {
 //    seqId = "P00519";
 //    userId = "5452";
 //    seqId = "Q76RF1";
-//    seqId = "C3Y4H7";
-            //    seqId = "A0A1F2";
+//    seqId = "A0A1F2";
 //    seqId = "P0AGE9";
 //    seqId = "A5VNG2";
 //    seqId = "P0AEK4";
-//    seqId = "O76290";
-//    seqId = "Q9RPT1";
+//    seqId = "Q6IM78";
 
 //    seqId = "A2TC87_SPHYA";
-//    seqId = "BRCA1_HUMAN";
 //    seqId = "P38398";
 //    pfamId = "PF01335";
+//    seqId = "Q9W3H4";
+//    seqId = "BRCA2_HUMAN";
+//    seqId = "C3Y4H7";
+//    seqId = "Q9RPT1";
+//      pfamId = "3.90.226.10";
+//      pfamId = "3.40.50.1000";
+//      pfamId = "1.10.600.10";
 
 // DEBUG
 //    useCATH = true;
+//    offLine = true;
+//    addEnzymes = true;
 //    useSSG = true;
 
   }
 
   protected void startup() {
 
-    // Set JGoodies Swing Look & Feel - http://www.jgoodies.com/freeware/looks/index.html
-    try {
-      UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-    } catch (Exception e) {
-      System.out.printf("ERROR: Could not set Plastic L&F.\n");
+// RAL 23 Oct 10 -->
+    if (!offLine) {
+      // Set JGoodies Swing Look & Feel - http://www.jgoodies.com/freeware/looks/index.html
+//@@      try {
+//@@        UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
+//@@      } catch (Exception e) {
+//@@        System.out.printf("ERROR: Could not set Plastic L&F.\n");
+//@@      }// <-- RAL 23 Oct 10
+
+// RAL 23 Oct 10 -->
     }
+// <-- RAL 23 Oct 10
 
     /* RAL 9 Jul 09 --> */
     // Get the location of the image files
@@ -276,12 +321,14 @@ public class Main extends SingleFrameApplication {
     getAppFrame().getDocumentationMenuItem().setText("Documentation");
 
     /* <-- RAL 15 Jul 09 */
-    getAppFrame().getGraphStylePanel().getEdgeLengthSlider().
-            addChangeListener(GraphStylePanelActions.getInstance().
-            getSpringLengthChangeListener(getAppFrame()));
-    getAppFrame().getGraphStylePanel().getConnectivityFilterSlider()
-            .addChangeListener(GraphStylePanelActions.getInstance().
-            getConnectionFilterChangeListener(getAppFrame()));
+    if (!offLine) {
+      getAppFrame().getGraphStylePanel().getEdgeLengthSlider().
+              addChangeListener(GraphStylePanelActions.getInstance().
+              getSpringLengthChangeListener(getAppFrame()));
+      getAppFrame().getGraphStylePanel().getConnectivityFilterSlider()
+              .addChangeListener(GraphStylePanelActions.getInstance().
+              getConnectionFilterChangeListener(getAppFrame()));
+    }
     /* RAL 3 Jul 09 -->
     getAppFrame().getGraphStylePanel().getShowSequenceCheckBox().addItemListener(GraphStylePanelActions.getInstance().getSequenceCheckboxListener(getAppFrame()));
     <-- RAL 2 Jul 09 */
@@ -515,7 +562,10 @@ public class Main extends SingleFrameApplication {
               sequenceSearchAction(getAppFrame(), getSearcher(), seqId, pfamId,
     /* RAL 17 Jun 10 --> */
 //              newSearch,userId);
-              newSearch, userId, useCATH, useSSG);
+// RAL 22 Oct 10 -->
+//              newSearch, userId, useCATH, useSSG);
+              newSearch, userId, useCATH, useSSG, offLine, addEnzymes);
+// <-- RAL 22 Oct 10
     /* <-- RAL 17 Jun 10 */
 
       // Get the numbers of sequences and domains matched

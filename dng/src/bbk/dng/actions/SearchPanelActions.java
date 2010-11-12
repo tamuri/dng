@@ -17,6 +17,8 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
 import com.mallardsoft.tuple.Pair;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 
 import prefuse.util.ColorLib;
@@ -36,6 +38,10 @@ public class SearchPanelActions {
   private int domainType;
   private boolean useCATH;
   private boolean useSSG;
+// RAL 22 Oct 10 -->
+  private boolean offLine;
+  private boolean addEnzymes;
+// <<- RAL 22 Oct 10
   private String domainSeparator = "\\.";
   private String parentArchitecture;
   private String parentSequence = null;
@@ -99,7 +105,11 @@ public class SearchPanelActions {
           SwissPfamSearcher searcher, String seqId, String pfamId,
   /* RAL 17 Jun 10 --> */
   //        boolean newSearch,String userId)
-          boolean newSearch,String userId,boolean useCATH,boolean useSSG)
+// RAL 22 Oct 10 -->
+//          boolean newSearch,String userId,boolean useCATH,boolean useSSG)
+          boolean newSearch,String userId,boolean useCATH,boolean useSSG,
+          boolean offLine, boolean addEnzymes)
+// <-- RAL 22 Oct 10
   /* <-- RAL 17 Jun 10 */
           throws Exception {
 
@@ -108,6 +118,10 @@ public class SearchPanelActions {
     seqSearchResults = null;
     this.useCATH = useCATH;
     this.useSSG = useSSG;
+// RAL 22 Oct 10 -->
+    this.offLine = offLine;
+    this.addEnzymes = addEnzymes;
+// <-- RAL 22 Oct 10
 
     // Get the sequence identifier from the text field
     if (seqId == null && pfamId == null) {
@@ -338,8 +352,11 @@ public class SearchPanelActions {
       int nSeqs = Integer.parseInt(domainDetails.get(d).get("nseqs"));
 
       // Add to the combo box
+      String endString = "seqs]";
+      if (nSeqs == 1)
+        endString = "seq]";
       model.add(model.size(), new NameValue(pfId + " " + description
-              + " [" + nSeqs + "seqs]", d));
+              + " [" + nSeqs + endString, d));
     }
 
     // Default to all domains selected
@@ -359,13 +376,17 @@ public class SearchPanelActions {
 
       // Id present, add it to the species combo box
       if (speciesEntry != null) {
-          String sp = speciesEntry.get("organism") + " [" +
-                  speciesEntry.get("nseqs") + "seqs]";
-          appFrame.getGraphCriteriaPanel().getOrganismComboBox().
-                  addItem(new NameValue(sp, special));
+        int nSeqs = Integer.parseInt(speciesEntry.get("nseqs"));
+        String endString = "seqs]";
+        if (nSeqs == 1) {
+          endString = "seq]";
+        }
+        String sp = speciesEntry.get("organism") + " [" + nSeqs + endString;
+        appFrame.getGraphCriteriaPanel().getOrganismComboBox().
+                addItem(new NameValue(sp, special));
 
-          // Remove from the set of species extensions
-          extensions.remove(special);
+        // Remove from the set of species extensions
+        extensions.remove(special);
       }
     }
 
@@ -692,17 +713,21 @@ public class SearchPanelActions {
     if (appFrame.getGraphStylePanel().getAddSequencesRadioButton().isSelected()) {
       GraphStylePanelActions.getInstance().
               AddRemoveSelectedNodes(appFrame,
-              GraphStylePanelActions.ADD_SEQUENCES);
+              GraphStylePanelActions.ADD_SEQUENCES, offLine);
     }
     else if (appFrame.getGraphStylePanel().getAddStructuresRadioButton().isSelected()) {
       GraphStylePanelActions.getInstance().
               AddRemoveSelectedNodes(appFrame,
-              GraphStylePanelActions.ADD_STRUCTURES);
+              GraphStylePanelActions.ADD_STRUCTURES, offLine);
     }
-    else if (appFrame.getGraphStylePanel().getAddEnzymesRadioButton().isSelected()) {
+// RAL 1 Nov 10 -->
+//    else if (appFrame.getGraphStylePanel().getAddEnzymesRadioButton().isSelected()) {
+    else if (appFrame.getGraphStylePanel().getAddEnzymesRadioButton().isSelected() ||
+            addEnzymes) {
+// <-- RAL 1 Nov 10
       GraphStylePanelActions.getInstance().
               AddRemoveSelectedNodes(appFrame,
-              GraphStylePanelActions.ADD_ENZYMES);
+              GraphStylePanelActions.ADD_ENZYMES, offLine);
     }
 
     // fit the graph
@@ -714,11 +739,10 @@ public class SearchPanelActions {
             getDisplay(0), bounds, 0);
 
 
-    /* <-- AUT 24 Feb 10 */
+    /* <-- AUG 24 Feb 10 */
       Thread t = new Thread(new RenderingCountdown(appFrame));
       t.start();
       /* AUT 24 Feb 10 --> */
-
 
     // Initialise sequences count
     int sequenceCount = 0;
@@ -878,6 +902,74 @@ public class SearchPanelActions {
 
     // Reset default cursor
     appFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+// RAL 22 Oct 10 -->
+    // If in off-line mode, wait for the plot to stop before generating the
+    // PostScript plot
+    if (offLine) {
+      for (int i = 0; i < 50 && t.isAlive(); i++) {
+        Thread.sleep(1000);
+      }
+
+      // Open output PostScript file
+      int errorCode = 0;
+      boolean landscape = false;
+      boolean writeError = false;
+      String psName = "ArchSchema.ps";
+      try {
+        // Write out the PostScript file
+        WritePSFile writePS = new WritePSFile(psName, appFrame,
+                useCATH, landscape);
+
+        // If file written OK, then show message
+        if (!writePS.getOK()) {
+          writeError = true;
+        }
+
+       // If error writing file, set flag
+      } catch (IOException error) {
+        writeError = true;
+      }
+
+      // If write failed, show warning message
+      if (writeError) {
+        System.out.println("*** ERROR. Failed to write output PostScript file "
+                + psName);
+        errorCode = -1;
+      }
+
+      // Loop twice to write out the domains and enzymes tables
+      for (int loop = 0; loop < 2; loop++) {
+
+        String outName;
+        String htmlPage;
+
+        // On first loop, write out the list of domains
+        if (loop == 0) {
+          outName = "domains.html";
+          htmlPage = masterText;
+        }
+
+        // On second loop, write out the list of enzymes
+        else {
+          outName = "enzymes.html";
+          htmlPage = enzymesText;
+        }
+
+        // Open output html file
+        PrintStream out = new PrintStream(outName);
+
+        // Write out the table
+        out.println(htmlPage);
+
+        // Close the file
+        out.close();
+      }
+
+      // Terminate the program
+      System.exit(errorCode);
+    }
+// <-- RAL 22 Oct 10
   }
 
   /* RAL 23 Jul 09 --> */
@@ -1083,8 +1175,12 @@ public class SearchPanelActions {
       String architecture = enzDetails.get("architecture");
 
       // Form label containing EC code and number of seqs
-      String enzyme
-              = enzDetails.get("id") + " (" + enzDetails.get("nseqs") + "seqs)";
+      int nSeqs = Integer.parseInt(enzDetails.get("nseqs"));
+      String endString = "seqs)";
+      if (nSeqs == 1) {
+        endString = "seq)";
+      }
+      String enzyme = enzDetails.get("id") + " (" + nSeqs + endString;
 
       // If we already have this architecture, add the enzyme code to it
       if (archEnzymeListPair.containsKey(architecture)) {
@@ -1933,7 +2029,7 @@ public class SearchPanelActions {
     String middle = imgSrc + "middle.gif" + imgEnd;
     String middleGap1 = imgSrc + "middle_gap1.gif" + imgEnd;
     String middleGap2 = imgSrc + "middle_gap2.gif" + imgEnd;
-    String splitCATHgif = "split_CATH.gif";
+    String splitCATHgif = "split_cath.gif";
     String pFamACATHgif = "pfamA_CATH.gif";
     String pFamAgif = "pfamA.gif";
     String pFamBgif = "pfamB.gif";
@@ -1953,7 +2049,7 @@ public class SearchPanelActions {
       middle = imgSrc + "middle_parent.gif" + imgEnd;
       middleGap1 = imgSrc + "middle_gap1_parent.gif" + imgEnd;
       middleGap2 = imgSrc + "middle_gap2_parent.gif" + imgEnd;
-      splitCATHgif = "split_CATH_parent.gif";
+      splitCATHgif = "split_cath_parent.gif";
       pFamACATHgif = "pfamA_CATH_parent.gif";
       pFamAgif = "pfamA_parent.gif";
       pFamBgif = "pfamB_parent.gif";
@@ -2273,8 +2369,9 @@ public class SearchPanelActions {
     if (nCollapsed < nArch) {
       sb.append("<tr>");
       sb.append("<td colspan=3>&nbsp;</td>");
-      sb.append("<td><font color=red>(Note: All Pfam-B domains have been " +
-              "replaced by a single dummy domain)</font></td>");
+      sb.append("<td><font color=red>Note: All Pfam-B domains (excluding any "
+              + "in the parent architecture) have been " +
+              "replaced by a single dummy domain, PB000000</font></td>");
       sb.append("<td>&nbsp;&nbsp;</td>");
       sb.append("<td align=right>&nbsp;</td>");
       sb.append("</tr>");
@@ -2328,7 +2425,7 @@ public class SearchPanelActions {
     if (domainType == PFAM) {
       sb.append("<td align=left valign=bottom><u>Pfam id</u></td>");
     } else {
-      sb.append("<td align=left valign=bottom><u>CATH code</u></td>");
+      sb.append("<td align=left valign=bottom><u>CATH/Pfam code</u></td>");
     }
     sb.append("<td>&nbsp;</td>");
     if (domainType == PFAM) {
@@ -2348,6 +2445,8 @@ public class SearchPanelActions {
 
     // Get the domain details from the results package
     Map<String, Map<String, String>> domainDetails = getDomainDetails();
+// DEBUG
+//    int colourIndex = 0;
 
     // Loop over the sorted domains list to show details
     for (String d : entries) {
@@ -2361,6 +2460,10 @@ public class SearchPanelActions {
       String colourString
               = String.format("#%02X%02X%02X", c.getRed(), c.getGreen(),
               c.getBlue());
+// DEBUG
+//      colourIndex++;
+//      System.out.println("DOMCOLOUR" + colourIndex + " " + colourString);
+// DEBUG
 
       // Show schematic diagram of this domain
       sb.append("<td align=center valign=top>");
@@ -2374,7 +2477,7 @@ public class SearchPanelActions {
       if (d.charAt(0) == 'p') {
         domName = d.substring(1);
       }
-      if (domainType == CATH)
+      if (d.charAt(0) != 'P')
         url = bbk.dng.Constants.URL_CATH;
       sb.append("<td valign=top><a href=\"" + url + domName + "\">" + d
               + "</a></td>");
@@ -2445,7 +2548,7 @@ public class SearchPanelActions {
     }
 
     // If showing CATH domains, adjust accordingly
-    if (useCATH) {
+    if (useCATH && domain.charAt(0) != 'P') {
       // Check for split CATH domain
       if (domain.charAt(0) == 'p') {
         domainImage = imgSrc + "key_splitCATH.gif" + imgEnd;
@@ -2604,6 +2707,13 @@ public class SearchPanelActions {
             + "signify a higher number of sequences in that class</i></td>");
     sb.append("</tr>");
 
+    // Explain white nodes
+    sb.append("<tr>");
+    sb.append("<td>&nbsp;&nbsp;</td>");
+    sb.append("<td><i>Any white E.C. class nodes "
+            + "signify mulitple E.C. numbers from different E.C. classes</i></td>");
+    sb.append("</tr>");
+
     // Close off table
     sb.append("</table>");
 
@@ -2634,7 +2744,7 @@ public class SearchPanelActions {
     sb.append("<table cellpadding=0 cellspacing=0>");
     sb.append("<tr>");
     sb.append("<td>&nbsp;&nbsp;</td>");
-    sb.append("<td align=center valign=bottom><u>E.C. number</u></td>");
+    sb.append("<td align=left valign=bottom><u>E.C. number</u></td>");
     sb.append("<td>&nbsp;</td>");
     sb.append("<td align=left valign=bottom><u>Description</u></td>");
     sb.append("<td>&nbsp;</td>");

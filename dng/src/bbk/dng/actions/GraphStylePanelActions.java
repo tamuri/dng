@@ -6,6 +6,7 @@ import bbk.dng.ui.panels.AppFrame;
 import bbk.dng.Main;
 import bbk.dng.graph.CustomizedForceDirectedLayout;
 import bbk.dng.graph.PrintUtilities;
+import bbk.dng.utils.CollectionUtils;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
@@ -121,6 +122,9 @@ public class GraphStylePanelActions {
       // Get this architecture node's total number of sequences
       int nSeqs = Integer.parseInt(connectorNode.getString("nseqs"));
 
+      // Create a map for the E.C.number stubs, if needed
+      Map<String, Integer> ecStub = CollectionUtils.newMap();
+
       if (!connectorNode.getString("name").
               /* RAL 2 Jul 09 -->
               equals(connectorNode.getString("sequences"))) { */
@@ -140,11 +144,52 @@ public class GraphStylePanelActions {
             int colour = defaultColour;
 
             /* <-- RAL 14 Jul 09 */
-
             // Initialise count of attached nodes
             int count = 0;
             String storedSeqs = "";
             for (String s : nodeString.split(splitChar)) {
+
+              // If these are enzyme nodes, save the various E.C. number
+              // "stubs"
+              if (node == Constants.ENZYME_NODE) {
+
+                // Save the string
+                String string = s;
+                int iPos = s.indexOf(" (");
+                if (iPos > -1) {
+                  string = s.substring(0, iPos);
+                }
+
+                // Break the E.C. number into its various stubs
+                for (int i = 0; i < 3; i++) {
+
+                  // Find last full-stop and create stub
+                  int lPos = string.lastIndexOf('.');
+
+                  // Create the stub
+                  if (lPos > -1) {
+                    String stub = string.substring(0, lPos);
+
+                    // If we already have this stub, then update count
+                    if (ecStub.containsKey(stub)) {
+
+                      // Get the value
+                      int nStub = ecStub.get(stub);
+
+                      // Increment and store
+                      nStub++;
+                      ecStub.put(stub, nStub);
+                    }
+
+                    // Otherwise, create new record for the stub
+                    else
+                      ecStub.put(stub, 1);
+                    
+                    // Make the stub the new string
+                    string = stub;
+                  }
+                }
+              }
 
               // Check that we haven't already got this sequence
               String sString = splitChar + s + splitChar;
@@ -157,7 +202,7 @@ public class GraphStylePanelActions {
               }
             }
 
-            // Get total number of nodes accfording to type
+            // Get total number of nodes according to type
             int nTotal = nSeqs;
             if (node == Constants.STRUC_NODE) {
               nTotal = count;
@@ -186,6 +231,11 @@ public class GraphStylePanelActions {
                   // Determine which E.C. class this node belongs to
                   int ecClass = Integer.parseInt(s.substring(0, 1));
 
+                  // Check if there is more than one E.C. class represented
+                  if (s.contains(",")) {
+                    ecClass = checkMultipleClass(s, ecClass, s.substring(0, 1));
+                  }
+
                   if (ecClass > 0 && ecClass < 7) {
                     int iCol = ecClass + 1;
 
@@ -194,7 +244,7 @@ public class GraphStylePanelActions {
                     int iPos = s.indexOf('(');
                     if (iPos > -1) {
                       String numberString = s.substring(iPos + 1);
-                      iPos = numberString.indexOf("seqs");
+                      iPos = numberString.indexOf("seq");
                       if (iPos > -1) {
 
                         // Get number of sequences
@@ -249,7 +299,14 @@ public class GraphStylePanelActions {
 
               // Add if not too many already attached to this architecture
               if (s.length() > 0 && count < bbk.dng.Constants.MAX_SEQSTR_NODES) {
-                /* <-- RAL 2 Jul 09 */
+
+                // If enzyme node, then annotate the E.C. number with the best
+                // stub
+                if (node == Constants.ENZYME_NODE) {
+//                  s = "<html><b>" + s + "</b>";
+                }
+
+                // Create the node
                 Node aNode = Main.graph.addNode();
                 aNode.setString("name", s);
                 aNode.setString("label", s);
@@ -424,18 +481,44 @@ public class GraphStylePanelActions {
       return;
     }
 
+    // Show dialogue for selection of portrait/landscape orientation
+    Object[] options = {"Portrait", "Landscape", "Cancel"};
+    int n = JOptionPane.showOptionDialog(appFrame,
+            "Choose orientation for PostScript plot",
+            "PostScript orientation",
+            JOptionPane.YES_NO_CANCEL_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]);
+    boolean cancelled = false;
+    if (n == JOptionPane.YES_OPTION) {
+      // Portrait option selected
+      landscape = false;
+    } else if (n == JOptionPane.NO_OPTION) {
+      // Landscape option selected
+      landscape = true;
+    } else if (n == JOptionPane.CANCEL_OPTION) {
+      // Cancel plot altogether
+      cancelled = true;
+    } else {
+      // Cancel plot altogether
+      cancelled = true;
+    }
+
     // Create size options dialogue box
-    PSOptions dialogue = new PSOptions(appFrame, true, landscape);
-    dialogue.setLocationRelativeTo(appFrame);
+    // PSOptions dialogue = new PSOptions(appFrame, true, landscape);
+    // dialogue.setLocationRelativeTo(appFrame);
 
     // Show the dialogue
-    dialogue.setVisible(true);
+    // dialogue.setVisible(true);
 
     // If not cancelled, get options and plot
-    if (!dialogue.cancelled()) {
+    // if (!dialogue.cancelled()) {
+    if (!cancelled) {
 
       // Retrieve the PostScript options entered by the user
-      landscape = dialogue.isLandscape();
+      // landscape = dialogue.isLandscape();
 
       // Write the PostScript file
       System.out.println("Writing PostScript file to: " + file.getPath());
@@ -492,10 +575,8 @@ public class GraphStylePanelActions {
             + (bbk.dng.Constants.gap[aType] * (archCount - 1));
     double x = item.getX() - boxWidth / 2;
     double y = item.getY();
-// DEBUG
-    System.out.println("archCount = " + archCount + "  Box width = "
-            + boxWidth);
-    /* RAL 3 Jul 09 --> */
+
+/* RAL 3 Jul 09 --> */
     // Initialise node height and sequence mid-point
     double height = bbk.dng.Constants.pfamAHeight[aType];
 
@@ -652,6 +733,25 @@ public class GraphStylePanelActions {
     appFrame.getGraphPanel().zoomToFit(appFrame.getGraphPanel().getVisualization());
   }
 
+  // Check whether the multiple E.C. class numbers all belong to the same
+  // class
+  private int checkMultipleClass(String ecNumbers, int ecClass,
+          String currentClass) {
+
+    // Split the string into separate E.C. numbers
+    for (String s : ecNumbers.split(" ")) {
+      // Get the first character
+      String firstChar = s.substring(0, 1);
+
+      // If not the same as tghe starting class, then have multiple
+      // classes
+      if (!firstChar.equals(currentClass) && !firstChar.equals("(")) {
+        ecClass = 0;
+      }
+    }
+    return ecClass;
+  }
+
   /* RAL 3 Jul 09 -->
   private class SequenceCheckboxListener implements ItemListener {
 
@@ -683,7 +783,7 @@ public class GraphStylePanelActions {
 
       // If selected, switch off sequence or structure nodes
       if (e.getStateChange() == ItemEvent.SELECTED) {
-        AddRemoveSelectedNodes(this.appFrame,DOMAINS_ONLY);
+        AddRemoveSelectedNodes(this.appFrame,DOMAINS_ONLY,false);
       }
     }
   }
@@ -701,7 +801,7 @@ public class GraphStylePanelActions {
 
       // If selected, switch off sequence or structure nodes
       if (e.getStateChange() == ItemEvent.SELECTED) {
-        AddRemoveSelectedNodes(this.appFrame,ADD_SEQUENCES);
+        AddRemoveSelectedNodes(this.appFrame,ADD_SEQUENCES,false);
       }
     }
   }
@@ -719,7 +819,7 @@ public class GraphStylePanelActions {
 
       // If selected, switch off sequence or structure nodes
       if (e.getStateChange() == ItemEvent.SELECTED) {
-        AddRemoveSelectedNodes(this.appFrame,ADD_STRUCTURES);
+        AddRemoveSelectedNodes(this.appFrame,ADD_STRUCTURES,false);
       }
     }
   }
@@ -737,13 +837,14 @@ public class GraphStylePanelActions {
 
       // If selected, switch off sequence or structure nodes
       if (e.getStateChange() == ItemEvent.SELECTED) {
-        AddRemoveSelectedNodes(this.appFrame,ADD_ENZYMES);
+        AddRemoveSelectedNodes(this.appFrame,ADD_ENZYMES,false);
       }
     }
   }
 
   // Add/remove appropriate nodes
-  public void AddRemoveSelectedNodes(AppFrame appFrame, String selected) {
+  public void AddRemoveSelectedNodes(AppFrame appFrame, String selected,
+          boolean offLine) {
 
     // If any satellite nodes displayed, remove these first
     if (showNodesStatus.equals(ADD_SEQUENCES) ||
@@ -785,10 +886,13 @@ public class GraphStylePanelActions {
     if (graphRenderingStatus.equals("stopped")) {
       toggleGraphAction(appFrame);
     }
-    /* <-- AUT 24 Feb 10 */
+
+    if (!offLine) {
+      /* <-- AUT 24 Feb 10 */
       Thread t = new Thread(new RenderingCountdown(appFrame));
       t.start();
       /* AUT 24 Feb 10 --> */
+    }
   }
   /* <-- RAL 3 Jul 09 */
 
@@ -851,7 +955,7 @@ public class GraphStylePanelActions {
       }
       /* <-- RAL 3 Jul 09 */
 
-      /* <-- AUT 24 Feb 10 */
+        /* <-- AUT 24 Feb 10 */
       Thread t = new Thread(new RenderingCountdown(appFrame));
       t.start();
       /* AUT 24 Feb 10 --> */

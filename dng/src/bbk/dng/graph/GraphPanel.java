@@ -1,5 +1,6 @@
 package bbk.dng.graph;
 
+import bbk.dng.utils.CollectionUtils;
 import prefuse.action.*;
 import prefuse.data.Tuple;
 import prefuse.data.expression.parser.ExpressionParser;
@@ -26,9 +27,13 @@ import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.List;
+import prefuse.data.Table;
 import prefuse.util.GraphicsLib;
 import prefuse.util.display.DisplayLib;
 import prefuse.visual.sort.ItemSorter;
+
 
 
 /**
@@ -47,6 +52,9 @@ public class GraphPanel extends JPanel {
   public static final String[] PREFERRED_FONT_NAME = {
     "Times New Roman", "Helvetica", "Georgia", "Bookman Old Style", "Arial"
   };
+  public final static int    ARCH_NODE = 0;
+  public final static int    SATELLITE_NODE = 1;
+  public final static String[] NODE_DESC = {"Architecture", "Satellite"};
   /* <-- RAL 9 Jul 09 */
 
     
@@ -66,8 +74,6 @@ public class GraphPanel extends JPanel {
 
     // new empty visualisation
     m_vis = new Visualization();
-
-      
 
     // add visual data groups
     m_vis.setInteractive(EDGES, null, false);
@@ -192,18 +198,6 @@ public class GraphPanel extends JPanel {
     //display.addControlListener(new RotationControl(Control.MIDDLE_MOUSE_BUTTON));
     //display.addControlListener(new ToolTipControl("name"));
     display.addControlListener(new ToolTipControl("label"));
-      
-      display.setItemSorter(new ItemSorter() {
-          @Override
-          public int score(VisualItem item) {
-              String type = item.getString("type");
-              if (type == null || ! type.equals("architecture")) {
-                  return 10;
-              } else {
-                  return 30;
-              }
-          }
-      });
 
     /*display.addControlListener(
     new ControlAdapter() {
@@ -212,6 +206,21 @@ public class GraphPanel extends JPanel {
     }
     }
     );*/
+
+    // Code to get the architecture nodes to come out on top when displaying
+    // satellite nodes
+    display.setItemSorter(new ItemSorter() {
+
+      @Override
+      public int score(VisualItem item) {
+        String type = item.getString("type");
+        if (type == null || !type.equals("architecture")) {
+          return 10;
+        } else {
+          return 20;
+        }
+      }
+    });
 
     // set things running
     m_vis.run("layout");
@@ -237,7 +246,6 @@ public class GraphPanel extends JPanel {
         Display display = vis.getDisplay(0);
         display.panToAbs(new Point((int) parent.getX(),
                 (int) parent.getY()));
-
         display.repaint();
       }
     }
@@ -280,6 +288,406 @@ public class GraphPanel extends JPanel {
     v.getGroup(Visualization.FOCUS_ITEMS).clear();
     v.removeGroup("graph");
     v.repaint();
+  }
+
+  // Remove all nodes and edges except those linking the clicked node to
+  // the parent node. If parent node clicked, then reinstate whole network
+  public synchronized void tracePathToParent(Visualization vis, VisualItem item,
+          String architecture, boolean useCATH) {
+
+    // Get the parent architecture
+    String parentArchitecture = findParent(vis);
+
+    // Determine whether this architecture is the parent architecture
+    boolean isParent = checkIfParent(item);
+
+    // If parent, then switch on all nodes and edges
+    boolean allOn = false;
+
+    // Pick up all the graph nodes
+    Map<Integer, VisualItem> nodeMap = getGraphNodesMap(vis);
+
+    // Identify which architecture nodes are in the path from the clicked
+    // architecture to the parent node
+    boolean[] selectedNode
+            = getNodesInPath(vis, nodeMap, architecture, parentArchitecture, isParent);
+
+    // Flag all satellite nodes connected to the switch-on nodes so that they
+    // will be retained
+    selectedNode = flagSatellites(vis, nodeMap, selectedNode);
+
+    // Switch off all but the selected nodes
+    switchNodesOnOff(vis, nodeMap, selectedNode);
+
+    // Ditto for edges
+    switchEdgesOnOff(vis, nodeMap, selectedNode);
+
+    // Redisplay graph
+    Display display = vis.getDisplay(0);
+    display.repaint();
+  }
+
+  // Return a map of the visible nodes on the graph
+  public Map<Integer, VisualItem> getGraphNodesMap(Visualization vis) {
+
+    // Get the graph nodes
+    TupleSet ts = vis.getGroup(NODES);
+
+    // Create a map between the nodes and their visual items
+    Map<Integer, VisualItem> nodeMap = CollectionUtils.newMap();
+
+    // Loop to get all the architecture nodes on the plot
+    Iterator iter = ts.tuples();
+    while (iter.hasNext()) {
+      Tuple tup = (Tuple) iter.next();
+      VisualItem node = vis.getVisualItem(NODES, tup);
+
+      // Get this node's row number
+      int row = node.getRow();
+
+      // Save the row number and link to corresponding visual item
+      nodeMap.put(row, node);
+    }
+
+    // Return the node map
+    return nodeMap;
+  }
+
+  // Switch off any unwanted architectures
+  private void switchNodesOnOff(Visualization vis, Map<Integer, VisualItem> nodeMap,
+          boolean[] selectedNode) {
+
+    // Loop over the nodes to switch on and off
+    for (int i = 0; i < nodeMap.size(); i++) {
+
+      // Get this node
+      VisualItem node = nodeMap.get(i);
+
+      // If not selected, then switch off
+      if (selectedNode[i]) {
+        node.setVisible(true);
+      } else {
+        node.setVisible(false);
+      }
+    }
+  }
+
+  // Find the parent architecture
+  private String findParent(Visualization vis) {
+
+    boolean done = false;
+    String parentArchitecture = "";
+
+    // Get the graph nodes
+    TupleSet ts = vis.getGroup(NODES);
+
+    // Loop to find parent architecture
+    Iterator iter = ts.tuples();
+    while (iter.hasNext() && !done) {
+      Tuple tup = (Tuple) iter.next();
+      VisualItem node = vis.getVisualItem(NODES, tup);
+
+      // Check if this is the parent node
+      if (checkIfParent(node)) {
+        parentArchitecture = node.getString("name");
+        done = true;
+      }
+    }
+
+    // Return the parent architecture
+    return parentArchitecture;
+  }
+
+    // Determine whether current architecture is the parent architecture
+  private boolean checkIfParent(VisualItem item) {
+    boolean isParent = false;
+
+    // Get architecture type: normal or parent
+    if (item.getSourceTuple().getBoolean("parent")) {
+      isParent = true;
+    }
+
+    // Return whether parent
+    return isParent;
+  }
+
+  // Get all nodes in the path between the two given architectures
+  private boolean[] getNodesInPath(Visualization vis, Map<Integer, VisualItem> nodeMap,
+          String startArchitecture, String endArchitecture, boolean parent) {
+
+    boolean done = false;
+
+    // Create an array of node-flags
+    int nNodes = nodeMap.size();
+    boolean[] used = new boolean[nNodes];
+    boolean[] nodeSelected = new boolean[nNodes];
+
+    // Initialise selected nodes flags
+    for (int i = 0; i < nodeMap.size(); i++) {
+      nodeSelected[i] = false;
+    }
+
+    // If user has clicked in the parent node, then need to return all nodes
+    if (parent) {
+      for (int i = 0; i < nodeMap.size(); i++) {
+        nodeSelected[i] = true;
+      }
+
+      // Return the full list of nodes
+      return nodeSelected;
+    }
+
+    // Initialise paths stack
+    Set<List<Integer>> paths = CollectionUtils.newSet();
+
+    // Get the node numbers of the start- and end-nodes
+    int startNode = getNodeNumber(nodeMap, startArchitecture);
+    int endNode = getNodeNumber(nodeMap, endArchitecture);
+
+    // Create path by placing the start node onto is
+    List<Integer> nodeList = CollectionUtils.newList();
+    nodeList.add(startNode);
+
+    // Add this first path to the stack of paths to be processed
+    paths.add(nodeList);
+
+    // Loop until we have one or more paths to the end architecture
+    while (!done) {
+
+      // Initialise new paths added to stack
+      Set<List<Integer>> addPaths = CollectionUtils.newSet();
+      Set<List<Integer>> removePaths = CollectionUtils.newSet();
+
+      // Get the next path off the stack
+      Iterator iter = paths.iterator();
+      while (iter.hasNext()) {
+        // Pick up the path as a list of nodes
+        List<Integer> pathNodes = (List<Integer>) iter.next();
+
+        // Initialise the node-flags
+        for (int i = 0; i < nNodes; i++) used[i] = false;
+
+        // Initialise last node to which new nodes will be added
+        int lastNode = -1;
+
+        // Loop over the nodes in the current path to set the flags of the
+        // used nodes
+        Iterator jter = pathNodes.iterator();
+        while (jter.hasNext()) {
+          // Get the next node
+          int iNode = (Integer) jter.next();
+          
+          // Set this node's used flag
+          used[iNode] = true;
+
+          // Save the last node
+          lastNode = iNode;
+        }
+
+        // Get the edges
+        TupleSet ts = vis.getGroup(EDGES);
+
+        // Loop over the edges to create new paths with any connected
+        // nodes added
+        Iterator kter = ts.tuples();
+        while (kter.hasNext()) {
+
+          // Get this edge
+          Tuple tup = (Tuple) kter.next();
+          VisualItem edge = vis.getVisualItem(EDGES, tup);
+
+          // Get the Table entry for this edge
+          Table t = edge.getTable();
+          int row = edge.getRow();
+
+          // Get the two nodes that are joined by this edge
+          int iNode1 = t.getInt(row, "source");
+          int iNode2 = t.getInt(row, "target");
+
+          // If one is the node we are currently processing, then see if we
+          // already have the other one
+          int otherNode = -1;
+          if (iNode1 == lastNode) otherNode = iNode2;
+          if (iNode2 == lastNode) otherNode = iNode1;
+
+          // If have the other node, check that it hasn't already been joined to
+          if (otherNode > -1) {
+
+            // If node is free, then create a new path with this node added
+            if (!used[otherNode]) {
+
+              // Create a new path
+              List<Integer> newPath = CollectionUtils.newList();
+
+              // Copy across the existing nodes
+              Iterator lter = pathNodes.iterator();
+              while (lter.hasNext()) {
+                // Get the next node
+                int iNode = (Integer) lter.next();
+
+                // Add to new path
+                newPath.add(iNode);
+              }
+
+              // Add new node to this path
+              newPath.add(otherNode);
+
+              // If this latset node is the end node, then this path is
+              // complete and we can add it to the output stack
+              if (otherNode == endNode) {
+
+                // Add nodes in this path to the output set
+                Iterator mter = newPath.iterator();
+                while (mter.hasNext()) {
+                  // Get the next node
+                  int iNode = (Integer) mter.next();
+
+                  // Add to the output set of nodes
+                  nodeSelected[iNode] = true;
+                }
+              } else {
+
+                // Otherwise, add new path to the stack
+                addPaths.add(newPath);
+              }
+            }
+          }
+        }
+
+        // Remove the current path from the list
+        removePaths.add(pathNodes);
+      }
+
+      // Remove any paths that need to be removed
+      Iterator nter = removePaths.iterator();
+      while (nter.hasNext()) {
+        // Pick up this new path
+        List<Integer> pathNodes = (List<Integer>) nter.next();
+
+        // Add it to our current path stack
+        paths.remove(pathNodes);
+      }
+
+      // If no new paths added to the stack, then we're done
+      if (addPaths.size() == 0) {
+        done = true;
+      }
+
+      // Otherwise, add new paths to current set
+      else {
+        nter = addPaths.iterator();
+        while (nter.hasNext()) {
+          // Pick up this new path
+          List<Integer> pathNodes = (List<Integer>) nter.next();
+
+          // Add it to our current path stack
+          paths.add(pathNodes);
+        }
+      }
+    }
+
+    // Return the set of nodes in the path(s) between the start and end nodes
+    return nodeSelected;
+  }
+
+  // Return the node number of the given architecture
+  private int getNodeNumber(Map<Integer, VisualItem> nodeMap,
+          String architecture) {
+
+    int nodeNumber = -1;
+
+    for (int i = 0; i < nodeMap.size() && nodeNumber == -1; i++) {
+      VisualItem node = nodeMap.get(i);
+      if (node.getString("name").equals(architecture)) {
+        nodeNumber = i;
+      }
+    }
+
+    // Return the node number
+    return nodeNumber;
+  }
+
+  // Flag all satellite nodes connected to selected architecture nodes
+  private boolean[] flagSatellites(Visualization vis, Map<Integer, VisualItem> nodeMap,
+          boolean[] selectedNode) {
+
+    // Get the edges
+    TupleSet ts = vis.getGroup(EDGES);
+
+    // Loop over the edges to create new paths with any connected
+    // nodes added
+    Iterator kter = ts.tuples();
+    while (kter.hasNext()) {
+
+      // Get this edge
+      Tuple tup = (Tuple) kter.next();
+      VisualItem edge = vis.getVisualItem(EDGES, tup);
+
+      // Get the Table entry for this edge
+      Table t = edge.getTable();
+      int row = edge.getRow();
+
+      // Get the two nodes that are joined by this edge
+      int iNode1 = t.getInt(row, "source");
+      int iNode2 = t.getInt(row, "target");
+      int otherNode = -1;
+
+      // If either node is selected get other one
+      if (selectedNode[iNode1]) {
+        otherNode = iNode2;
+      } else if (selectedNode[iNode2]) {
+        otherNode = iNode1;
+      }
+
+      // If have other node, then check to see if it is a satellite node
+      if (otherNode > -1) {
+
+        // Get this node
+        VisualItem node = nodeMap.get(otherNode);
+
+        // If node is a satellite node, then mark to keep it
+        if (node.getSourceTuple().getString("name").
+              equals(node.getSourceTuple().getString("sequences"))) {
+          selectedNode[otherNode] = true;
+        }
+      }
+    }
+
+    // Return the new set of flags
+    return selectedNode;
+  }
+
+  // Switch off edges between any unselected nodes
+  private void switchEdgesOnOff(Visualization vis, Map<Integer, VisualItem> nodeMap,
+          boolean[] selectedNode) {
+
+    // Get the edges
+    TupleSet ts = vis.getGroup(EDGES);
+
+    // Loop over the edges to create new paths with any connected
+    // nodes added
+    Iterator kter = ts.tuples();
+    while (kter.hasNext()) {
+
+      // Get this edge
+      Tuple tup = (Tuple) kter.next();
+      VisualItem edge = vis.getVisualItem(EDGES, tup);
+
+      // Get the Table entry for this edge
+      Table t = edge.getTable();
+      int row = edge.getRow();
+
+      // Get the two nodes that are joined by this edge
+      int iNode1 = t.getInt(row, "source");
+      int iNode2 = t.getInt(row, "target");
+
+      // If both nodes are switched on, display edge
+      if (selectedNode[iNode1] && selectedNode[iNode2]) {
+        edge.setVisible(true);
+      } else {
+        edge.setVisible(false);
+      }
+    }
   }
 }
 
