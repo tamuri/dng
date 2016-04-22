@@ -14,15 +14,15 @@ import bbk.dng.utils.CollectionUtils;
 /**
  * Date: 13-Aug-2008 20:13:08
  */
-public class SwissPfamSearcher {
+public class LuceneSwissPfamSearcher {
     IndexSearcher architectureSearcher;
     QueryParser architectureParser;
     IndexSearcher domainSearcher;
     QueryParser domainParser;
 
-    SwissPfamSearcher() {}
+    LuceneSwissPfamSearcher() {}
 
-    public SwissPfamSearcher(String indexDir) throws Exception{
+    public LuceneSwissPfamSearcher(String indexDir) throws Exception{
         SwissPfamIndexer sp = new SwissPfamIndexer();
 
         architectureSearcher = new IndexSearcher(IndexReader.open(indexDir + SwissPfamIndexer.SEQUENCES_DIR));

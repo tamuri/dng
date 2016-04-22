@@ -1,6 +1,6 @@
 package bbk.dng.servlets;
 
-import bbk.dng.data.index.SwissPfamSearcher;
+import bbk.dng.data.index.LuceneSwissPfamSearcher;
 import bbk.dng.utils.CollectionUtils;
 
 import java.io.*;
@@ -12,14 +12,14 @@ import javax.servlet.http.*;
 
 public class Search extends HttpServlet {
 
-    private SwissPfamSearcher searcher;
+    private LuceneSwissPfamSearcher searcher;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         String indexDir = config.getInitParameter("indexDir");
         try {
-            searcher = new SwissPfamSearcher(indexDir);
+            searcher = new LuceneSwissPfamSearcher(indexDir);
         } catch (Exception e) {
             System.out.printf("Error loading SwissPfamSearch component!\n");
             e.printStackTrace();
